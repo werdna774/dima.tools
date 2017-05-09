@@ -1,0 +1,14 @@
+Package: dima.tools
+Type: Package
+Title: Reading, Manipulating, Analyzing, and Visualizing Data from Copies of the Database for Inventory, Monitoring, and Assessment (DIMA)
+Version: 0.1.0
+Authors@R: person("Nelson", "Stauffer", email = "Nelson.Stauffer@ars.usda.gov", role = c("aut", "cre"))
+Description: A collection of functions for reading the background tables of raw data from DIMAs and manipulating them to make them useful.
+Depends: R (>= 3.1.0)
+License: MIT License
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.0.1
+Imports:
+  tidyverse,
+  RODBC
