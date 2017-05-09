@@ -81,7 +81,7 @@ extract.table <- function(data.path, dima, query){
   if (length(dima.list[dima.list %in% list.files(path = data.path, pattern = "\\.(MDB)|(mdb)|(accdb)|(ACCDB)$")]) != length(dima.list)) {
     stop("Unable to find the specified DIMA in the provided data path")
   }
-  
+
   ## Use the appropriate function from RODBC:: based on 32- versus 64-bit installs of R
   if (R.Version()$arch == "x86_64") {
     dima.channel <- RODBC::odbcConnectAccess2007(paste(data.path, dima.name, sep = "/"))
