@@ -4,9 +4,9 @@
 \alias{read.dima}
 \title{Reading in data from multiple DIMAs}
 \usage{
-read.dima(data.path, dima.list = NULL, gap = T, lpi = T,
-  species.inventory = T, stability = T, custom.query = NULL,
-  combine = T)
+read.dima(data.path, dima.list = NULL, gap = T, lpi = T, species = T,
+  species.inventory = T, stability = T, stability.tidy = T,
+  custom.query = NULL, combine = T)
 }
 \arguments{
 \item{data.path}{A string specifying the folder path containing the DIMA[s].}
@@ -17,9 +17,13 @@ read.dima(data.path, dima.list = NULL, gap = T, lpi = T,
 
 \item{lpi}{Logical. If \code{T} then line-point intercept data will be read in with a default SQL query. Defaults to \code{T}.}
 
+\item{species}{Logical. If \code{T} then species data will be read in with a default SQL query. Defaults to \code{T}.}
+
 \item{species.inventory}{Logical. If \code{T} then species inventory data will be read in with a default SQL query. Defaults to \code{T}.}
 
 \item{stability}{Logical. If \code{T} then soil stability data will be read in with a default SQL query. Defaults to \code{T}.}
+
+\item{stability.tidy}{Logical. \code{T} then soil stability data will be reformatted from the format in DIMA into a tidy data frame. Defaults to \code{T}.}
 
 \item{custom.query}{An optional named character vector of one or more SQL queries. Value names should follow the same pattern as "gap", "lpi", "species.inventory".}
 
