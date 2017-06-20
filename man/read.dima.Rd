@@ -4,30 +4,33 @@
 \alias{read.dima}
 \title{Reading in data from multiple DIMAs}
 \usage{
-read.dima(data.path, dima.list = NULL, gap = T, lpi = T, species = T,
-  species.inventory = T, stability = T, stability.tidy = T,
-  custom.query = NULL, combine = T)
+read.dima(data.path, dima.list = NULL, all.tables = FALSE, gap = TRUE,
+  lpi = TRUE, species = TRUE, species.inventory = TRUE,
+  stability = TRUE, stability.tidy = TRUE, custom.query = NULL,
+  combine = TRUE)
 }
 \arguments{
 \item{data.path}{A string specifying the folder path containing the DIMA[s].}
 
 \item{dima.list}{An optional character vector of one or more filenames of DIMAs to read data from in \code{data.path}. If not specified, all DIMAs in the folder will be read from.}
 
-\item{gap}{Logical. If \code{T} then canopy gap data will be read in with a default SQL query. Defaults to \code{T}.}
+\item{gap}{Logical. If \code{TRUE} then canopy gap data will be read in with a default SQL query. Defaults to \code{TRUE}.}
 
-\item{lpi}{Logical. If \code{T} then line-point intercept data will be read in with a default SQL query. Defaults to \code{T}.}
+\item{lpi}{Logical. If \code{TRUE} then line-point intercept data will be read in with a default SQL query. Defaults to \code{TRUE}.}
 
-\item{species}{Logical. If \code{T} then species data will be read in with a default SQL query. Defaults to \code{T}.}
+\item{species}{Logical. If \code{TRUE} then species data will be read in with a default SQL query. Defaults to \code{TRUE}.}
 
-\item{species.inventory}{Logical. If \code{T} then species inventory data will be read in with a default SQL query. Defaults to \code{T}.}
+\item{species.inventory}{Logical. If \code{TRUE} then species inventory data will be read in with a default SQL query. Defaults to \code{TRUE}.}
 
-\item{stability}{Logical. If \code{T} then soil stability data will be read in with a default SQL query. Defaults to \code{T}.}
+\item{stability}{Logical. If \code{TRUE} then soil stability data will be read in with a default SQL query. Defaults to \code{TRUE}.}
 
-\item{stability.tidy}{Logical. \code{T} then soil stability data will be reformatted from the format in DIMA into a tidy data frame. Defaults to \code{T}.}
+\item{stability.tidy}{Logical. \code{TRUE} then soil stability data will be reformatted from the format in DIMA into a tidy data frame. Defaults to \code{TRUE}.}
 
 \item{custom.query}{An optional named character vector of one or more SQL queries. Value names should follow the same pattern as "gap", "lpi", "species.inventory".}
 
-\item{combine}{Logical. If \code{T} then the output will be a named list of data frames, one for each SQL query. The data frames will contain all of the relevant data from all of the DIMAs read from. If \code{F} then the output will be a named list of per-DIMA named lists of query result data frames. Defaults to \code{T}.}
+\item{combine}{Logical. If \code{TRUE} then the output will be a named list of data frames, one for each SQL query. The data frames will contain all of the relevant data from all of the DIMAs read from. If \code{FALSE} then the output will be a named list of per-DIMA named lists of query result data frames. Defaults to \code{TRUE}.}
+
+\item{all}{Logical. If \code{TRUE} then the contents of all tables in the database will be read in. Defaults to \code{FALSE}.}
 }
 \description{
 This will read in data from one or more DIMAs according to the SQL queries requested and includes default SQL queries for canopy gap, line-point intercept, soil stability, and species inventory data. The output is either a list of lists of query results named with the source filename[s] or a list of query results combined from all sources named with the query name[s].
