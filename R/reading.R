@@ -88,18 +88,18 @@ extract.table <- function(data.path, dima, query){
   if (is.null(names(query)) | length(names(query)[!grepl(x = names(query), pattern = "^$")]) != length(names(query))) {
     stop("The query vector must have a name for each value, even if there is only one.")
   }
-  if (length(dima.list[grepl(x = dima.list, pattern = "\\.(MDB)|(mdb)|(accdb)|(ACCDB)$")]) != length(dima.list)) {
+  if (!grepl(x = dima, pattern = "\\.(MDB)|(mdb)|(accdb)|(ACCDB)$")) {
     stop("Valid file extension required for the argument dima.")
   }
-  if (length(dima.list[dima.list %in% list.files(path = data.path, pattern = "\\.(MDB)|(mdb)|(accdb)|(ACCDB)$")]) != length(dima.list)) {
+  if (!(dima %in% list.files(path = data.path, pattern = "\\.(MDB)|(mdb)|(accdb)|(ACCDB)$"))) {
     stop("Unable to find the specified DIMA in the provided data path")
   }
 
   ## Use the appropriate function from RODBC:: based on 32- versus 64-bit installs of R
   if (R.Version()$arch == "x86_64") {
-    dima.channel <- RODBC::odbcConnectAccess2007(paste(data.path, dima.name, sep = "/"))
+    dima.channel <- RODBC::odbcConnectAccess2007(paste(data.path, dima, sep = "/"))
   } else if (R.Version()$arch == "i386") {
-    dima.channel <- RODBC::odbcConnectAccess(paste(data.path, dima.name, sep = "/"))
+    dima.channel <- RODBC::odbcConnectAccess(paste(data.path, dima, sep = "/"))
   }
   ## Apply the SQL queries to the DIMA
   data.current <- lapply(query, FUN = RODBC::sqlQuery, channel = dima.channel, stringsAsFactors = FALSE)
