@@ -27,6 +27,9 @@ read.dima <- function(data.path,
                       ){
   if (is.null(dima.list)) {
     dima.list <- list.files(path = data.path, pattern = "\\.(MDB)|(mdb)|(accdb)|(ACCDB)$")
+    if (is.null(dima.list)) {
+      stop(paste0("No Access databases found in ", data.path))
+    }
   } else {
     if (length(dima.list[grepl(x = dima.list, pattern = "\\.(MDB)|(mdb)|(accdb)|(ACCDB)$")]) != length(dima.list)) {
       stop("Valid file extension required for all DIMAs in argument dima.list")
@@ -37,30 +40,195 @@ read.dima <- function(data.path,
     }
   }
 
-  queries <- list()
-  queries$lpi <- "SELECT joinSitePlotLine.SiteID, joinSitePlotLine.SiteKey, joinSitePlotLine.SiteID, joinSitePlotLine.PlotID, joinSitePlotLine.PlotKey, tblLPIHeader.Observer, tblLPIHeader.Recorder, tblLPIHeader.DataEntry, tblLPIHeader.DataErrorChecking, tblLPIHeader.FormDate, joinSitePlotLine.LineID, tblLPIDetail.PointLoc, tblLPIDetail.TopCanopy, tblLPIDetail.Lower1, tblLPIDetail.Lower2, tblLPIDetail.Lower3, tblLPIDetail.Lower4, tblLPIDetail.Lower5, tblLPIDetail.Lower6, tblLPIDetail.Lower7, tblLPIDetail.SoilSurface, tblLPIDetail.HeightWoody, tblLPIDetail.HeightHerbaceous, tblLPIDetail.SpeciesWoody, tblLPIDetail.SpeciesHerbaceous, tblLPIDetail.ShrubShape, tblLPIDetail.ChkboxTop, tblLPIDetail.ChkboxLower1, tblLPIDetail.ChkboxLower2, tblLPIDetail.ChkboxLower3, tblLPIDetail.ChkboxLower4, tblLPIDetail.ChkboxLower5, tblLPIDetail.ChkboxLower6, tblLPIDetail.ChkboxLower7, tblLPIDetail.ChkboxSoil, tblLPIDetail.ChkboxWoody, tblLPIDetail.ChkboxHerbaceous, tblLPIHeader.CheckboxLabel
-  FROM joinSitePlotLine INNER JOIN (tblLPIHeader LEFT JOIN tblLPIDetail ON tblLPIHeader.RecKey = tblLPIDetail.RecKey) ON joinSitePlotLine.LineKey = tblLPIHeader.LineKey;"
-  queries$gap <- "SELECT joinSitePlotLine.SiteID, joinSitePlotLine.SiteKey, joinSitePlotLine.PlotID, joinSitePlotLine.PlotKey, tblGapHeader.FormDate, tblGapHeader.Observer, tblGapHeader.Recorder, tblGapHeader.DataEntry, tblGapHeader.DataErrorChecking, tblGapHeader.LineLengthAmount, joinSitePlotLine.LineID, tblGapDetail.GapStart, tblGapDetail.GapEnd, tblGapDetail.Gap, tblGapHeader.Perennials, tblGapHeader.AnnualGrasses, tblGapHeader.AnnualForbs, tblGapHeader.Other
-  FROM joinSitePlotLine INNER JOIN (tblGapHeader INNER JOIN tblGapDetail ON tblGapHeader.RecKey = tblGapDetail.RecKey) ON joinSitePlotLine.LineKey = tblGapHeader.LineKey;"
-  queries$stability <- "SELECT joinSitePlotLine.SiteID, joinSitePlotLine.SiteKey, joinSitePlotLine.PlotID, joinSitePlotLine.PlotKey, joinSitePlotLine.LineID, tblSoilStabHeader.FormDate, tblSoilStabHeader.Observer, tblSoilStabHeader.Recorder, tblSoilStabHeader.DataEntry, tblSoilStabHeader.DataErrorChecking, tblSoilStabDetail.BoxNum, tblSoilStabDetail.Line1, tblSoilStabDetail.Line2, tblSoilStabDetail.Line3, tblSoilStabDetail.Line4, tblSoilStabDetail.Line5, tblSoilStabDetail.Line6, tblSoilStabDetail.Pos1, tblSoilStabDetail.Pos2, tblSoilStabDetail.Pos3, tblSoilStabDetail.Pos4, tblSoilStabDetail.Pos5, tblSoilStabDetail.Pos6, tblSoilStabDetail.Pos7, tblSoilStabDetail.Pos8, tblSoilStabDetail.Pos9, tblSoilStabDetail.Pos10, tblSoilStabDetail.Pos11, tblSoilStabDetail.Pos12, tblSoilStabDetail.Pos13, tblSoilStabDetail.Pos14, tblSoilStabDetail.Pos15, tblSoilStabDetail.Pos16, tblSoilStabDetail.Pos17, tblSoilStabDetail.Pos18, tblSoilStabDetail.Veg1, tblSoilStabDetail.Veg2, tblSoilStabDetail.Veg3, tblSoilStabDetail.Veg4, tblSoilStabDetail.Veg5, tblSoilStabDetail.Veg6, tblSoilStabDetail.Veg7, tblSoilStabDetail.Veg8, tblSoilStabDetail.Veg9, tblSoilStabDetail.Veg10, tblSoilStabDetail.Veg11, tblSoilStabDetail.Veg12, tblSoilStabDetail.Veg13, tblSoilStabDetail.Veg14, tblSoilStabDetail.Veg15, tblSoilStabDetail.Veg16, tblSoilStabDetail.Veg17, tblSoilStabDetail.Veg18, tblSoilStabDetail.Rating1, tblSoilStabDetail.Rating2, tblSoilStabDetail.Rating3, tblSoilStabDetail.Rating4, tblSoilStabDetail.Rating5, tblSoilStabDetail.Rating6, tblSoilStabDetail.Rating7, tblSoilStabDetail.Rating8, tblSoilStabDetail.Rating9, tblSoilStabDetail.Rating10, tblSoilStabDetail.Rating11, tblSoilStabDetail.Rating12, tblSoilStabDetail.Rating13, tblSoilStabDetail.Rating14, tblSoilStabDetail.Rating15, tblSoilStabDetail.Rating16, tblSoilStabDetail.Rating17, tblSoilStabDetail.Rating18, tblSoilStabDetail.Hydro1, tblSoilStabDetail.Hydro2, tblSoilStabDetail.Hydro3, tblSoilStabDetail.Hydro4, tblSoilStabDetail.Hydro5, tblSoilStabDetail.Hydro6, tblSoilStabDetail.Hydro7, tblSoilStabDetail.Hydro8, tblSoilStabDetail.Hydro9, tblSoilStabDetail.Hydro10, tblSoilStabDetail.Hydro11, tblSoilStabDetail.Hydro12, tblSoilStabDetail.Hydro13, tblSoilStabDetail.Hydro14, tblSoilStabDetail.Hydro15, tblSoilStabDetail.Hydro16, tblSoilStabDetail.Hydro17, tblSoilStabDetail.Hydro18
-FROM (tblSoilStabHeader LEFT JOIN tblSoilStabDetail ON tblSoilStabHeader.RecKey = tblSoilStabDetail.RecKey) INNER JOIN joinSitePlotLine ON tblSoilStabHeader.PlotKey = joinSitePlotLine.PlotKey;"
-  queries$species <- "SELECT tblSpecies.SpeciesCode, tblSpecies.ScientificName, tblSpeciesGrowthHabit.GrowthHabit, tblSpeciesGrowthHabit.GrowthHabitSub, tblSpecies.Duration, tblSpecies.Invasive, tblSpeciesGroups.GroupName
-FROM (tblSpecies INNER JOIN tblSpeciesGrowthHabit ON tblSpecies.GrowthHabitCode = tblSpeciesGrowthHabit.Code) INNER JOIN tblSpeciesGroups ON tblSpecies.Group = tblSpeciesGroups.RecKey;"
-  queries$species.inventory <- "SELECT joinSitePlotLine.SiteID, joinSitePlotLine.SiteKey, joinSitePlotLine.PlotID, joinSitePlotLine.PlotKey, tblSpecRichHeader.FormDate, tblSpecRichHeader.Observer, tblSpecRichHeader.Recorder, tblSpecRichHeader.DataEntry, tblSpecRichHeader.DataErrorChecking, tblSpecRichDetail.SpeciesCount, tblSpecRichDetail.SpeciesList
-FROM joinSitePlotLine INNER JOIN (tblSpecRichHeader LEFT JOIN tblSpecRichDetail ON tblSpecRichHeader.RecKey = tblSpecRichDetail.RecKey) ON joinSitePlotLine.LineKey = tblSpecRichHeader.LineKey;"
 
-  queries.requested <- queries[c("gap", "lpi", "species", "species.inventory", "stability")[c(gap, lpi, species, species.inventory, stability)]]
+  ## All of the tables found in a DIMA because we can't get it from an external SQL query
+  {dima.tables <- c("tblApplicationConstants",
+                    "tblBSNE_Box",
+                    "tblBSNE_BoxCollection",
+                    "tblBSNE_Stack",
+                    "tblBSNE_TrapCollection",
+                    "tblCanopyGapDetail",
+                    "tblCanopyGapHeader",
+                    "tblCanopyGapSpecies",
+                    "tblCompactDetail",
+                    "tblCompactHeader",
+                    "tblCounty",
+                    "tblDKDetail",
+                    "tblDKHeader",
+                    "tblDryWtCompYield",
+                    "tblDryWtDetail",
+                    "tblDryWtHeader",
+                    "tblDryWtSpecies",
+                    "tblEcolSites",
+                    "tblESDDominantPerennialHeight",
+                    "tblESDRockFragments",
+                    "tblESDWaypoints",
+                    "tblGapDetail",
+                    "tblGapHeader",
+                    "tblGISDatums",
+                    "tblInfiltrationDetail",
+                    "tblInfiltrationHeader",
+                    "tblKMLFields",
+                    "tblLICDetail",
+                    "tblLICHeader",
+                    "tblLICSpecies",
+                    "tblLines",
+                    "tblLowerCanopy",
+                    "tblLPIDetail",
+                    "tblLPIHeader",
+                    "tblLPILowerCodes",
+                    "tblLPIMeasures",
+                    "tblLPIMeasures default",
+                    "tblLPIOtherCodes",
+                    "tblLPISpecies",
+                    "tblMaintBedrock",
+                    "tblMaintCarbonateStage",
+                    "tblMaintDKClass",
+                    "tblMaintErosionPatternClass",
+                    "tblMaintESDFragmentTypes",
+                    "tblMaintESDRupture",
+                    "tblMaintGeomorphComp",
+                    "tblMaintHorizons",
+                    "tblMaintLandform",
+                    "tblMaintLandform1",
+                    "tblMaintMinerologyClasses",
+                    "tblMaintNASIS",
+                    "tblMaintNearestPerennial",
+                    "tblMaintParentMaterial",
+                    "tblMaintParentMaterial1",
+                    "tblMaintParticleSizes",
+                    "tblMaintPlotTags",
+                    "tblMaintPosition",
+                    "tblMaintQualIndicators",
+                    "tblMaintQualRatings",
+                    "tblMaintResourceRetentionClasses",
+                    "tblMaintSlopeShape",
+                    "tblMaintSoilRedistributionClass",
+                    "tblMaintSoilStability",
+                    "tblMaintSoilTempClasses",
+                    "tblMaintSoilTexture",
+                    "tblMaintStructureShapes",
+                    "tblMaintSurfaceSoilProperties",
+                    "tblMethods",
+                    "tblNestedFreqDetail",
+                    "tblNestedFreqHeader",
+                    "tblNestedFreqSpeciesDetail",
+                    "tblNestedFreqSpeciesSummary",
+                    "tblNoneSpecies",
+                    "tblOcularCovDetail",
+                    "tblOcularCovHeader",
+                    "tblOwnership",
+                    "tblPastCondHeader",
+                    "tblPDFs",
+                    "tblPeople",
+                    "tblPhotos",
+                    "tblPlantDenDetail",
+                    "tblPlantDenHeader",
+                    "tblPlantDenQuads",
+                    "tblPlantDenSpecies",
+                    "tblPlantProdDetail",
+                    "tblPlantProdHeader",
+                    "tblPlotCustomLookup1",
+                    "tblPlotCustomLookup2",
+                    "tblPlotCustomLookup3",
+                    "tblPlotFormDefaults",
+                    "tblPlotHistory",
+                    "tblPlotMgtCropData",
+                    "tblPlotMgtDetail",
+                    "tblPlotMgtHeader",
+                    "tblPlotNotes",
+                    "tblPlots",
+                    "tblPlotTags",
+                    "tblPTFrameDetail",
+                    "tblPTFrameHeader",
+                    "tblQualDetail",
+                    "tblQualHeader",
+                    "tblReportIndicators",
+                    "tblReportParms",
+                    "tblReports",
+                    "tblRiparProDetail",
+                    "tblRiparProHeader",
+                    "tblRiparSurvDetail",
+                    "tblRiparSurvHeader",
+                    "tblRiparSurvSpecies",
+                    "tblRptCalcDetails",
+                    "tblSageEval",
+                    "tblSageLek",
+                    "tblSageRange",
+                    "tblSites",
+                    "tblSoilPitHorizons",
+                    "tblSoilPits",
+                    "tblSoilStabDetail",
+                    "tblSoilStabHeader",
+                    "tblSoilStabSubtotal",
+                    "tblSoilSurface",
+                    "tblSoilSurfaceOcular",
+                    "tblSortSpecies",
+                    "tblSpecies",
+                    "tblSpecies1",
+                    "tblSpeciesGeneric",
+                    "tblSpeciesGeneric_baseline",
+                    "tblSpeciesGroups",
+                    "tblSpeciesGrowthHabit",
+                    "tblSpecRichAbundance",
+                    "tblSpecRichDetail",
+                    "tblSpecRichHeader",
+                    "tblStateMLRAs",
+                    "tblStateMLRAs1",
+                    "tblTempPlots",
+                    "tblTempSites",
+                    "tblTempSpecies",
+                    "tblTreeDenDetail",
+                    "tblTreeDenHeader",
+                    "tblUtilDetail",
+                    "tblUtilHeader",
+                    "tblUtilTransect",
+                    "tblVegStructDetail",
+                    "tblVegStructHeader",
+                    "UnknownTracking"
+  )}
+
+  queries <- list()
+  if (all.tables) {
+    ## Create a query for every table in DIMA that pulls in the whole table
+    queries <- c(queries,
+                 setNames(lapply(dima.tables, FUN = function(X){
+                   paste0("SELECT * FROM ", X)
+                 }), dima.tables)
+    )
+  }
+  if (lpi) {
+    queries$lpi <- "SELECT joinSitePlotLine.SiteID, joinSitePlotLine.SiteKey, joinSitePlotLine.SiteID, joinSitePlotLine.PlotID, joinSitePlotLine.PlotKey, tblLPIHeader.Observer, tblLPIHeader.Recorder, tblLPIHeader.DataEntry, tblLPIHeader.DataErrorChecking, tblLPIHeader.FormDate, joinSitePlotLine.LineID, tblLPIDetail.PointLoc, tblLPIDetail.TopCanopy, tblLPIDetail.Lower1, tblLPIDetail.Lower2, tblLPIDetail.Lower3, tblLPIDetail.Lower4, tblLPIDetail.Lower5, tblLPIDetail.Lower6, tblLPIDetail.Lower7, tblLPIDetail.SoilSurface, tblLPIDetail.HeightWoody, tblLPIDetail.HeightHerbaceous, tblLPIDetail.SpeciesWoody, tblLPIDetail.SpeciesHerbaceous, tblLPIDetail.ShrubShape, tblLPIDetail.ChkboxTop, tblLPIDetail.ChkboxLower1, tblLPIDetail.ChkboxLower2, tblLPIDetail.ChkboxLower3, tblLPIDetail.ChkboxLower4, tblLPIDetail.ChkboxLower5, tblLPIDetail.ChkboxLower6, tblLPIDetail.ChkboxLower7, tblLPIDetail.ChkboxSoil, tblLPIDetail.ChkboxWoody, tblLPIDetail.ChkboxHerbaceous, tblLPIHeader.CheckboxLabel
+    FROM joinSitePlotLine INNER JOIN (tblLPIHeader LEFT JOIN tblLPIDetail ON tblLPIHeader.RecKey = tblLPIDetail.RecKey) ON joinSitePlotLine.LineKey = tblLPIHeader.LineKey;"
+  }
+  if (gap) {
+    queries$gap <- "SELECT joinSitePlotLine.SiteID, joinSitePlotLine.SiteKey, joinSitePlotLine.PlotID, joinSitePlotLine.PlotKey, tblGapHeader.FormDate, tblGapHeader.Observer, tblGapHeader.Recorder, tblGapHeader.DataEntry, tblGapHeader.DataErrorChecking, tblGapHeader.LineLengthAmount, joinSitePlotLine.LineID, tblGapDetail.GapStart, tblGapDetail.GapEnd, tblGapDetail.Gap, tblGapHeader.Perennials, tblGapHeader.AnnualGrasses, tblGapHeader.AnnualForbs, tblGapHeader.Other
+    FROM joinSitePlotLine INNER JOIN (tblGapHeader INNER JOIN tblGapDetail ON tblGapHeader.RecKey = tblGapDetail.RecKey) ON joinSitePlotLine.LineKey = tblGapHeader.LineKey;"
+  }
+  if (stability) {
+    queries$stability <- "SELECT joinSitePlotLine.SiteID, joinSitePlotLine.SiteKey, joinSitePlotLine.PlotID, joinSitePlotLine.PlotKey, joinSitePlotLine.LineID, tblSoilStabHeader.FormDate, tblSoilStabHeader.Observer, tblSoilStabHeader.Recorder, tblSoilStabHeader.DataEntry, tblSoilStabHeader.DataErrorChecking, tblSoilStabDetail.BoxNum, tblSoilStabDetail.Line1, tblSoilStabDetail.Line2, tblSoilStabDetail.Line3, tblSoilStabDetail.Line4, tblSoilStabDetail.Line5, tblSoilStabDetail.Line6, tblSoilStabDetail.Pos1, tblSoilStabDetail.Pos2, tblSoilStabDetail.Pos3, tblSoilStabDetail.Pos4, tblSoilStabDetail.Pos5, tblSoilStabDetail.Pos6, tblSoilStabDetail.Pos7, tblSoilStabDetail.Pos8, tblSoilStabDetail.Pos9, tblSoilStabDetail.Pos10, tblSoilStabDetail.Pos11, tblSoilStabDetail.Pos12, tblSoilStabDetail.Pos13, tblSoilStabDetail.Pos14, tblSoilStabDetail.Pos15, tblSoilStabDetail.Pos16, tblSoilStabDetail.Pos17, tblSoilStabDetail.Pos18, tblSoilStabDetail.Veg1, tblSoilStabDetail.Veg2, tblSoilStabDetail.Veg3, tblSoilStabDetail.Veg4, tblSoilStabDetail.Veg5, tblSoilStabDetail.Veg6, tblSoilStabDetail.Veg7, tblSoilStabDetail.Veg8, tblSoilStabDetail.Veg9, tblSoilStabDetail.Veg10, tblSoilStabDetail.Veg11, tblSoilStabDetail.Veg12, tblSoilStabDetail.Veg13, tblSoilStabDetail.Veg14, tblSoilStabDetail.Veg15, tblSoilStabDetail.Veg16, tblSoilStabDetail.Veg17, tblSoilStabDetail.Veg18, tblSoilStabDetail.Rating1, tblSoilStabDetail.Rating2, tblSoilStabDetail.Rating3, tblSoilStabDetail.Rating4, tblSoilStabDetail.Rating5, tblSoilStabDetail.Rating6, tblSoilStabDetail.Rating7, tblSoilStabDetail.Rating8, tblSoilStabDetail.Rating9, tblSoilStabDetail.Rating10, tblSoilStabDetail.Rating11, tblSoilStabDetail.Rating12, tblSoilStabDetail.Rating13, tblSoilStabDetail.Rating14, tblSoilStabDetail.Rating15, tblSoilStabDetail.Rating16, tblSoilStabDetail.Rating17, tblSoilStabDetail.Rating18, tblSoilStabDetail.Hydro1, tblSoilStabDetail.Hydro2, tblSoilStabDetail.Hydro3, tblSoilStabDetail.Hydro4, tblSoilStabDetail.Hydro5, tblSoilStabDetail.Hydro6, tblSoilStabDetail.Hydro7, tblSoilStabDetail.Hydro8, tblSoilStabDetail.Hydro9, tblSoilStabDetail.Hydro10, tblSoilStabDetail.Hydro11, tblSoilStabDetail.Hydro12, tblSoilStabDetail.Hydro13, tblSoilStabDetail.Hydro14, tblSoilStabDetail.Hydro15, tblSoilStabDetail.Hydro16, tblSoilStabDetail.Hydro17, tblSoilStabDetail.Hydro18
+    FROM (tblSoilStabHeader LEFT JOIN tblSoilStabDetail ON tblSoilStabHeader.RecKey = tblSoilStabDetail.RecKey) INNER JOIN joinSitePlotLine ON tblSoilStabHeader.PlotKey = joinSitePlotLine.PlotKey;"
+  }
+  if (species) {
+    queries$species <- "SELECT tblSpecies.SpeciesCode, tblSpecies.ScientificName, tblSpeciesGrowthHabit.GrowthHabit, tblSpeciesGrowthHabit.GrowthHabitSub, tblSpecies.Duration, tblSpecies.Invasive, tblSpeciesGroups.GroupName
+    FROM (tblSpecies INNER JOIN tblSpeciesGrowthHabit ON tblSpecies.GrowthHabitCode = tblSpeciesGrowthHabit.Code) INNER JOIN tblSpeciesGroups ON tblSpecies.Group = tblSpeciesGroups.RecKey;"
+  }
+  if (species.inventory) {
+    queries$species.inventory <- "SELECT joinSitePlotLine.SiteID, joinSitePlotLine.SiteKey, joinSitePlotLine.PlotID, joinSitePlotLine.PlotKey, tblSpecRichHeader.FormDate, tblSpecRichHeader.Observer, tblSpecRichHeader.Recorder, tblSpecRichHeader.DataEntry, tblSpecRichHeader.DataErrorChecking, tblSpecRichDetail.SpeciesCount, tblSpecRichDetail.SpeciesList
+    FROM joinSitePlotLine INNER JOIN (tblSpecRichHeader LEFT JOIN tblSpecRichDetail ON tblSpecRichHeader.RecKey = tblSpecRichDetail.RecKey) ON joinSitePlotLine.LineKey = tblSpecRichHeader.LineKey;"
+  }
+
   if (!is.null(custom.query)) {
     if (is.null(names(custom.query)) | length(names(custom.query)[!grepl(x = names(custom.query), pattern = "^$")]) != length(names(custom.query))) {
       stop("The custom.query vector must have a name for each value.")
     }
-    queries.requested <- c(queries.requested, custom.query)
+    queries <- c(queries, custom.query)
   }
 
   data <- list()
   ## This loops because you can only have one channel open at a time, which means there's no use for a lapply()
   for (dima.name in dima.list) {
-    data.current <- extract.table(data.path = data.path, dima = dima.name, query = queries.requested)
+    data.current <- extract.table(data.path = data.path, dima = dima.name, query = queries)
     if (stability.tidy & ("stability" %in% names(data.current))) {
       data.current$stability <- tidy.stability(data.current$stability)
     }
@@ -70,9 +238,9 @@ FROM joinSitePlotLine INNER JOIN (tblSpecRichHeader LEFT JOIN tblSpecRichDetail 
 
   ## If requested, combine all like data from all like queries
   if (combine) {
-    output <- lapply(names(queries.requested),
+    output <- lapply(names(queries),
                      function(X) dplyr::bind_rows(data[grepl(x = names(data), pattern = paste0(X, "$"))])) %>%
-      setNames(names(queries.requested))
+      setNames(names(queries))
   } else {
     output <- data
   }
