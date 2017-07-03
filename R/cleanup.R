@@ -29,7 +29,7 @@ tidy.stability <- function(dataframe){
   output <- lapply(1:18, function(X) {
     cbind(header,
           dataframe[, grep(x = names(dataframe), pattern = paste0("[a-z]", X, "$"))]
-          ) %>% setNames(names(.) %>% stringr::str_replace(., pattern = paste0(X, "$"), replacement = ""))}
+    ) %>% setNames(names(.) %>% stringr::str_replace(., pattern = paste0(X, "$"), replacement = ""))}
   ) %>% dplyr::bind_rows()
 
   return(output)
