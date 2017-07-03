@@ -65,10 +65,10 @@ metamerge <- function(dima.tables = list(),
   }
 
   ## The metadata lookup table
-  sites.plots.lines <- merge(x = merge(x = dima.tables$tblSites,
-                                       y = dima.tables$tblPlots,
+  sites.plots.lines <- merge(x = merge(x = dplyr::select(dima.tables$tblSites, -DateModified),
+                                       y = dplyr::select(dima.tables$tblPlots, -DateModified),
                                        by = "SiteKey"),
-                             y = dima.tables$tblLines,
+                             y = dplyr::select(dima.tables$tblLines, -DateModified),
                              by = "PlotKey")
 
   ## Combine the Header and Detail tables for this form
