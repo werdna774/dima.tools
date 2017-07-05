@@ -7,7 +7,7 @@
 pct.cover.ah(lpi.tall, ...)
 }
 \arguments{
-\item{lpi.tall}{A tall/long-format data frame. Use the ouput from \code{gather.lpi}.}
+\item{lpi.tall}{A tall/long-format data frame. Use the data frame \code{"layers"} from the \code{gather.lpi()} output.}
 
 \item{...}{One or more bare variable name from \code{lpi.tall} to calculate percent cover for, e.g. \code{GrowthHabitSub} to calculate percent cover by growth habits or \code{GrowthHabitSub, Duration} to calculate percent cover for categories like perennial forbs, annual graminoids, etc.}
 }
