@@ -2,10 +2,12 @@
 #' @description For a given form, combine the form's header and detail data then merge with site, plot, and line data
 #' @param dima.tables A list of data frames. The output from \code{read.dima()} can be provided directly as this argument.
 #' @param form A string specifying which form to work with. This can either be the form name in the background tables of DIMA or the human version, e.g. \code{"CanopyGap"}, \code{"Canopy Gap"}, \code{"LPI"}, \code{"Line Point Intercept"}, \code{"Species Richness"}, etc. This is case insensitive.
+#' @param minimum Logical. If \code{TRUE} then only the keys and names for the site, plot, and line will be included. Defaults to \code{TRUE}
 #' @return A data frame created by merging \code{tblSites}, \code{tblPlots}, \code{tblLines}, and the header and detail tables for the selected form.
 #' @export
 metamerge <- function(dima.tables = list(),
-                      form = ""
+                      form = "",
+                      minimum = TRUE
 ){
   forms <- c("CANOPY GAP" = "CanopyGap",
              "COMPACTION" = "Compact",
@@ -70,6 +72,13 @@ metamerge <- function(dima.tables = list(),
                                        by = "SiteKey"),
                              y = dplyr::select(dima.tables$tblLines, -DateModified),
                              by = "PlotKey")
+
+  if (minimum) {
+    sites.plots.lines <- dplyr::select(sites.plots.lines,
+                                       dplyr::starts_with("site", ignore.case = TRUE),
+                                       dplyr::starts_with("plot", ignore.case = TRUE),
+                                       dplyr::starts_with("line", ignore.case = TRUE))
+  }
 
   ## Combine the Header and Detail tables for this form
   header.details <- merge(x = dima.tables[[tables.required[4]]],
