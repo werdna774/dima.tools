@@ -1,9 +1,12 @@
 #' Calculating percent cover (any hit) from LPI data.
-#' @description Calculate the percent cover by plot for variables or combinations of variables. Percent cover will be calculated for every combination of the variables requested, so if the variables are \code{GrowthHabitSub} and \code{Duration} then the output will contain fields like \code{Graminoid.Perennial}, \code{Graminoid.Annual}, \code{Shrub.Perennial}, etc. whereas using just the variable \code{code} will produce one column per species code. Any number of grouping variables can be used. Because these are calculated as cover from anywhere in the canopy column, values for a plot will virtually always sum to > 100% due to multiple layers of vegetation occuring at pin drops.
+#' @description Calculate the percent cover by plot for variables or combinations of variables. Percent cover will be calculated for every combination of the variables requested, so if the variables are \code{GrowthHabitSub} and \code{Duration} then the output will contain fields like \code{Graminoid.Perennial}, \code{Graminoid.Annual}, \code{Shrub.Perennial}, etc. whereas using just the variable \code{code} will produce one column per species code. Any number of grouping variables can be used. Because these are calculated as cover from anywhere in the canopy column, values for a plot will virtually always sum to > 100% due to multiple layers of vegetation occuring at pin drops. Any groupings where all the variable values were \code{NA} will be dropped.
 #' @param lpi.tall A tall/long-format data frame. Use the data frame \code{"layers"} from the \code{gather.lpi()} output.
 #' @param ... One or more bare variable name from \code{lpi.tall} to calculate percent cover for, e.g. \code{GrowthHabitSub} to calculate percent cover by growth habits or \code{GrowthHabitSub, Duration} to calculate percent cover for categories like perennial forbs, annual graminoids, etc.
+#' @tall Logical. If \code{TRUE} then the returned data frame will be tall rather than wide and will not have observations for non-existent values e.g., if no data fell into a group on a plot, there will be no row for that group on that plot. Defaults to \code{FALSE}.
 #' @export
-pct.cover.ah <- function(lpi.tall, ...){
+pct.cover.ah <- function(lpi.tall,
+                         tall = FALSE,
+                         ...){
   ## Get a list of the variables the user wants to group by.
   grouping.variables <- rlang::quos(...)
 
@@ -21,13 +24,16 @@ pct.cover.ah <- function(lpi.tall, ...){
     # numbers of lines and line lengths are handled correctly.
     # Sorting the values then taking the last [number of lines on the plot] values is the trick to not over/underestimating!
     dplyr::summarize(percent = 100*sum(present, na.rm = TRUE)/sum(tail(sort(PointNbr), length(unique(LineID))))) %>%
-    ## Make the data table wide
-    tidyr::spread(key = grouping, value = percent) %>%
     ## Remove the empty groupings, that is the ones where all the grouping variable values were NA
-    dplyr::select(-dplyr::matches("^[NA.]{0,100}NA$")) %>%
-    ## Replace the NA values with 0s because they represent 0% cover for that grouping
-    tidyr::replace_na(replace = setNames(as.list(rep.int(0,
-                                                         times = length(unique(names(.)[!(names(.) %in% c("SiteKey", "SiteID", "SiteName", "PlotKey", "PlotID"))])))),
-                                         unique(names(.)[!(names(.) %in% c("SiteKey", "SiteID", "SiteName", "PlotKey", "PlotID"))])))
+    dplyr::filter(!grepl(grouping, pattern = "^[NA.]{0,100}NA$"))
+
+  if (tall) {
+    summary <- tidyr::spread(summary, key = grouping, value = percent) %>%
+      ## Replace the NA values with 0s because they represent 0% cover for that grouping
+      tidyr::replace_na(replace = setNames(as.list(rep.int(0,
+                                                           times = length(unique(names(.)[!(names(.) %in% c("SiteKey", "SiteID", "SiteName", "PlotKey", "PlotID"))])))),
+                                           unique(names(.)[!(names(.) %in% c("SiteKey", "SiteID", "SiteName", "PlotKey", "PlotID"))])))
+  }
+
   return(summary)
 }
