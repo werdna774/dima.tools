@@ -3,11 +3,13 @@ tidy.stability <- function(dataframe){
   offenders <- lapply(names(dataframe) %>% setNames(names(dataframe)), function(X) {
     class(dataframe[, X]) %>% grepl(pattern = "logical")
   }) %>% .[grepl(x = names(.), pattern = "^Veg")] %>% .[unlist(.)] %>% names()
-  bad.columns <- dataframe[, offenders]
-  ## This replaces all the F values with "F" values
-  bad.columns[!bad.columns] <- "F"
-  ## Replace the columns in the original input with the corrected ones
-  dataframe[, offenders] <- bad.columns
+  if (length(offenders) > 0){
+    bad.columns <- dataframe[, offenders]
+    ## This replaces all the F values with "F" values
+    bad.columns[!bad.columns] <- "F"
+    ## Replace the columns in the original input with the corrected ones
+    dataframe[, offenders] <- bad.columns
+  }
 
   ## Get the header information to bind to data subsets in the lapply() later
   header <- dataframe %>% select(SiteID, SiteKey, PlotID, PlotKey, FormDate, Observer, Recorder, DataEntry, DataErrorChecking, BoxNum)
