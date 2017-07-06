@@ -3,5 +3,5 @@
 export(extract.table)
 export(gather.lpi)
 export(metamerge)
-export(pct.cover.ah)
+export(pct.cover)
 export(read.dima)
