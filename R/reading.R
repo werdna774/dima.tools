@@ -275,11 +275,13 @@ extract.table <- function(data.path, dima, query){
   }
 
   ## Use the appropriate function from RODBC:: based on 32- versus 64-bit installs of R
-  if (R.Version()$arch == "x86_64") {
-    dima.channel <- RODBC::odbcConnectAccess2007(paste(data.path, dima, sep = "/"))
-  } else if (R.Version()$arch == "i386") {
-    dima.channel <- RODBC::odbcConnectAccess(paste(data.path, dima, sep = "/"))
-  }
+  switch(R.Version()$arch,
+         "x86_64" = {
+           dima.channel <- RODBC::odbcConnectAccess2007(paste(data.path, dima, sep = "/"))
+         },
+         "i386" = {
+           dima.channel <- RODBC::odbcConnectAccess(paste(data.path, dima, sep = "/"))
+         })
   ## Apply the SQL queries to the DIMA
   data.current <- lapply(query, FUN = RODBC::sqlQuery, channel = dima.channel, stringsAsFactors = FALSE)
   RODBC::odbcClose(channel = dima.channel)
