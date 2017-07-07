@@ -4,27 +4,30 @@
 #' @param data.path A string specifying the folder path containing the DIMA[s].
 #' @param dima.list An optional character vector of one or more filenames of DIMAs to read data from in \code{data.path}. If not specified, all DIMAs in the folder will be read from.
 #' @param all Logical. If \code{TRUE} then the contents of all tables in the database will be read in. Defaults to \code{FALSE}.
-#' @param gap Logical. If \code{TRUE} then canopy gap data will be read in with a default SQL query. Defaults to \code{TRUE}.
-#' @param lpi Logical. If \code{TRUE} then line-point intercept data will be read in with a default SQL query. Defaults to \code{TRUE}.
-#' @param species Logical. If \code{TRUE} then species data will be read in with a default SQL query. Defaults to \code{TRUE}.
-#' @param species.inventory Logical. If \code{TRUE} then species inventory data will be read in with a default SQL query. Defaults to \code{TRUE}.
-#' @param stability Logical. If \code{TRUE} then soil stability data will be read in with a default SQL query. Defaults to \code{TRUE}.
-#' @param stability.tidy Logical. \code{TRUE} then soil stability data will be reformatted from the format in DIMA into a tidy data frame. Defaults to \code{TRUE}.
+#' @param gap Logical. If \code{TRUE} then canopy gap data will be read in with a default SQL query. Defaults to \code{FALSE}.
+#' @param lpi Logical. If \code{TRUE} then line-point intercept data will be read in with a default SQL query. Defaults to \code{FALSE}.
+#' @param species Logical. If \code{TRUE} then species data will be read in with a default SQL query. Defaults to \code{FALSE}.
+#' @param species.inventory Logical. If \code{TRUE} then species inventory data will be read in with a default SQL query. Defaults to \code{FALSE}.
+#' @param stability Logical. If \code{TRUE} then soil stability data will be read in with a default SQL query. Defaults to \code{FALSE}.
+#' @param stability.tidy Logical. \code{TRUE} then soil stability data will be reformatted from the format in DIMA into a tidy data frame. Defaults to \code{FALSE}.
 #' @param custom.query An optional named character vector of one or more SQL queries. Value names should follow the same pattern as "gap", "lpi", "species.inventory".
 #' @param combine Logical. If \code{TRUE} then the output will be a named list of data frames, one for each SQL query. The data frames will contain all of the relevant data from all of the DIMAs read from. If \code{FALSE} then the output will be a named list of per-DIMA named lists of query result data frames. Defaults to \code{TRUE}.
 #' @export
 read.dima <- function(data.path,
                       dima.list = NULL,
                       all.tables = FALSE,
-                      gap = TRUE,
-                      lpi = TRUE,
-                      species = TRUE,
-                      species.inventory = TRUE,
-                      stability = TRUE,
-                      stability.tidy = TRUE,
+                      gap = FALSE,
+                      lpi = FALSE,
+                      species = FALSE,
+                      species.inventory = FALSE,
+                      stability = FALSE,
+                      stability.tidy = FALSE,
                       custom.query = NULL,
                       combine = TRUE
                       ){
+  if (!any(all.tables, gap, lpi, species, species.inventory, stability, !is.null(custom.query))) {
+    stop("At least one of all.tables, gap, lpi, species, species.inventory, and stability must be TRUE or custom.query must not be NULL.")
+  }
   if (is.null(dima.list)) {
     dima.list <- list.files(path = data.path, pattern = "\\.(MDB)|(mdb)|(accdb)|(ACCDB)$")
     if (is.null(dima.list)) {
