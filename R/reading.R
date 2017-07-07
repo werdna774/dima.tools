@@ -242,7 +242,9 @@ read.dima <- function(data.path,
   ## If requested, combine all like data from all like queries
   if (combine) {
     output <- lapply(names(queries),
-                     function(X) dplyr::bind_rows(data[grepl(x = names(data), pattern = paste0(X, "$"))])) %>%
+                     function(X) {
+                       dplyr::bind_rows(data[grepl(x = names(data), pattern = paste0(X, "$"))])
+                       }) %>%
       setNames(names(queries))
   } else {
     output <- data
