@@ -241,11 +241,52 @@ read.dima <- function(data.path,
 
   ## If requested, combine all like data from all like queries
   if (combine & length(data) > 1) {
-    output <- lapply(names(queries),
-                     function(X) {
-                       dplyr::bind_rows(data[grepl(x = names(data), pattern = paste0(X, "$"))])
-                     }) %>%
-      setNames(names(queries))
+    ## This gets spooky, but the lapply()s are nested so that for each DIMA each query is pulled out and combined with dplyr::bind_rows()
+    output <- setNames(lapply(names(queries),
+                              function(X, data) {
+                                message(X)
+                                lapply(data,
+                                       function(X, query) {
+                                         print(str(X$tblLines$LineID))
+                                         df <- getElement(object = X, name = query)
+                                         if (!is.null(nrow(df))) {
+                                           ## These are weird fields that need to be coerced here because dplyr::bind_rows() can't do it
+                                           ## These are also ad hoc, so chances are that others will need to be added later.
+                                           if ("LineID" %in% names(df)){
+                                             df$LineID <- as.character(df$LineID)
+                                           }
+                                           if ("PlotID" %in% names(df)){
+                                             df$PlotID <- as.character(df$PlotID)
+                                           }
+                                           if ("SiteID" %in% names(df)){
+                                             df$SiteID <- as.character(df$SiteID)
+                                           }
+                                           if ("PlotKey" %in% names(df)){
+                                             df$PlotKey <- as.numeric(df$PlotKey)
+                                           }
+                                           if ("RecKey" %in% names(df)){
+                                             df$RecKey <- as.numeric(df$RecKey)
+                                           }
+                                           if ("HorizonDepthLower" %in% names(df)){
+                                             df$HorizonDepthLower <- as.numeric(df$HorizonDepthLower)
+                                           }
+                                           if ("SoilDepthLower" %in% names(df)){
+                                             df$SoilDepthLower <- as.numeric(df$SoilDepthLower)
+                                           }
+                                           ## If a data frame is empty, then the returned values is NULL
+                                           if (nrow(df) > 0) {
+                                             df
+                                           } else {
+                                             NULL
+                                           }
+                                         }
+                                       },
+                                       query = X) %>% dplyr::bind_rows()
+                              },
+                              data = data),
+                       names(queries))
+    message("If you received coercion warnings, some of your data did not meet the correct formatting and was corrupted on import.")
+
   } else {
     if (length(data) == 1) {
       output <- data[[1]]
