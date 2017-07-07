@@ -7,7 +7,8 @@ common.species <- function(dima.tables){
                    all.x = TRUE)
 
   species.uniques <- dplyr::select(species, SpeciesCode, Duration, GrowthHabit, GrowthHabitSub) %>%
-    dplyr::distinct() %>% dplyr::group_by(SpeciesCode) %>% dplyr::summarize(count = n())
+    dplyr::distinct() %>% dplyr::group_by(SpeciesCode, SpeciesCode, Duration, GrowthHabit, GrowthHabitSub) %>%
+    dplyr::summarize(count = n())
 
   ## Get a list of three data frames, each one with the code and the most common value for that characteristic
   species.common.list <- lapply(X = c("Duration", "GrowthHabit", "GrowthHabitSub"),
