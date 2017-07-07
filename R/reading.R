@@ -45,7 +45,7 @@ read.dima <- function(data.path,
 
 
   ## All of the tables found in a DIMA because we can't get it from an external SQL query
-  {dima.tables <- c("tblApplicationConstants",
+  dima.tables <- c("tblApplicationConstants",
                     "tblBSNE_Box",
                     "tblBSNE_BoxCollection",
                     "tblBSNE_Stack",
@@ -189,7 +189,7 @@ read.dima <- function(data.path,
                     "tblVegStructDetail",
                     "tblVegStructHeader",
                     "UnknownTracking"
-  )}
+  )
 
   queries <- list()
   if (all.tables) {
