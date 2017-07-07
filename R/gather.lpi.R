@@ -114,7 +114,7 @@ gather.lpi <- function(dima.tables,
                      by.y = "Code",
                      all.x = TRUE)
     ## If this is a recent enough version of DIMA, bring in the group information
-    if (names(dima.tables$tblSpeciesGroups) != "dima.name.tblSpeciesGroups") {
+    if (class(dima.tables$tblSpeciesGroups) == "data.frame") {
       species <- merge(x = species,
                        y = dima.tables$tblSpeciesGroups,
                        by.x = "Group",
