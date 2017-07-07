@@ -13,9 +13,11 @@ common.species <- function(dima.tables){
   ## Get a list of three data frames, each one with the code and the most common value for that characteristic
   species.common.list <- lapply(X = c("Duration", "GrowthHabit", "GrowthHabitSub"),
                                 FUN = function(X, species.df){
-                                  dplyr::group_by_(species.df, "SpeciesCode", X) %>%
-                                    dplyr::summarize(count = n()) %>%
-                                    dplyr::arrange(desc(count)) %>%
+                                  counts <- dplyr::group_by_(species.df, "SpeciesCode", X) %>%
+                                    dplyr::summarize(count = n())
+                                  # Artificially drop the NA counts to 0 so we prefer non-NA values
+                                  counts$count[is.na(counts[[X]])] <- 0
+                                  counts %>% dplyr::arrange(desc(count)) %>%
                                     dplyr::ungroup() %>% dplyr::group_by(SpeciesCode) %>%
                                     summarize_(paste0("first(", X,")"))
                                 }, species.df = species)
