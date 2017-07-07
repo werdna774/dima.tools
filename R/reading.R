@@ -236,7 +236,7 @@ read.dima <- function(data.path,
       data.current$stability <- tidy.stability(data.current$stability)
     }
     ## Add the query results to the list data
-    data <- c(data, dima.name = data.current)
+    data[[dima.name]] <- data.current
   }
 
   ## If requested, combine all like data from all like queries
