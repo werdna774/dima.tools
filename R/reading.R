@@ -1,8 +1,8 @@
 #' Reading in data from multiple DIMAs
 #'
 #' @description This will read in data from one or more DIMAs according to the SQL queries requested and includes default SQL queries for canopy gap, line-point intercept, soil stability, and species inventory data. The output is either a list of lists of query results named with the source filename[s] or a list of query results combined from all sources named with the query name[s].
-#' @param data.path A string specifying the folder path containing the DIMA[s].
-#' @param dima.list An optional character vector of one or more filenames of DIMAs to read data from in \code{data.path}. If not specified, all DIMAs in the folder will be read from.
+#' @param data.path Character string. The path to the folder containing the DIMA[s].
+#' @param dima.list Optional character vector. One or more filenames of DIMAs to read data from in \code{data.path}. If not specified, all DIMAs in the folder will be read from.
 #' @param all Logical. If \code{TRUE} then the contents of all tables in the database will be read in. Defaults to \code{FALSE}.
 #' @param gap Logical. If \code{TRUE} then canopy gap data will be read in with a default SQL query. Defaults to \code{FALSE}.
 #' @param lpi Logical. If \code{TRUE} then line-point intercept data will be read in with a default SQL query. Defaults to \code{FALSE}.
