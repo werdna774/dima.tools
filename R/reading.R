@@ -291,7 +291,7 @@ read.dima <- function(data.path,
                               },
                               data = data),
                        names(queries))
-    message("If you received coercion warnings, some of your data (probably soil pit horizon depths) did not meet the correct formatting and were corrupted on import.")
+    message("If you received coercion warnings, some of your data (probably soil pit horizon depths) were an invalid type (e.g. included non-numeric characters) and were corrupted on import.")
 
   } else {
     if (length(data) == 1) {
