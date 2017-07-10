@@ -19,6 +19,7 @@ gather.lpi <- function(dima.tables,
 
   ## Strip out most of the variables because they're not relevant
   lpi.restricted <- dplyr::select(.data = lpi,
+                                  DateModified,
                                   dplyr::starts_with("site", ignore.case = TRUE),
                                   dplyr::starts_with("plot", ignore.case = TRUE),
                                   dplyr::starts_with("line", ignore.case = TRUE),
@@ -35,6 +36,7 @@ gather.lpi <- function(dima.tables,
 
   ## Make a tall data frame with the site-plot-line-point identifiers and the hit codes by layer
   lpi.hits.tall <- tidyr::gather(data = dplyr::select(.data = lpi.restricted,
+                                                      DateModified,
                                                       dplyr::starts_with("site", ignore.case = TRUE),
                                                       dplyr::starts_with("plot", ignore.case = TRUE),
                                                       dplyr::starts_with("line", ignore.case = TRUE),
@@ -49,6 +51,7 @@ gather.lpi <- function(dima.tables,
 
   ## Make a tall data frame with the site-plot-line-point identifiers and the checkbox status by layer
   lpi.chkbox.tall <- tidyr::gather(data = dplyr::select(.data = lpi.restricted,
+                                                        DateModified,
                                                         dplyr::starts_with("site", ignore.case = TRUE),
                                                         dplyr::starts_with("plot", ignore.case = TRUE),
                                                         dplyr::starts_with("line", ignore.case = TRUE),
@@ -98,6 +101,7 @@ gather.lpi <- function(dima.tables,
 
   ## Make an AIM height data frame
   lpi.habitheight.tall <- dplyr::select(.data = lpi.restricted,
+                                        DateModified,
                                         dplyr::starts_with("site", ignore.case = TRUE),
                                         dplyr::starts_with("plot", ignore.case = TRUE),
                                         dplyr::starts_with("line", ignore.case = TRUE),
