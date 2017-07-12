@@ -23,6 +23,7 @@ pct.cover <- function(lpi.tall,
                     y = point.totals,
                     all.x = TRUE)
 
+
   summary <- switch(hit,
                     "any" = {lpi.tall %>%
                         dplyr::group_by(SiteKey, SiteID, SiteName, PlotKey, PlotID, LineID, PointNbr, point.count,
