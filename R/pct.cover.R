@@ -28,7 +28,7 @@ pct.cover <- function(lpi.tall,
   summary <- switch(hit,
                     "any" = {
                       if (year) {
-                        summary <- lpi.tall %>% dplyr::mutate(Year = format(lubridate::as_date(DateModified), "%Y")) %>%
+                        summary <- lpi.tall %>% dplyr::mutate(Year = format(lubridate::as_date(FormDate), "%Y")) %>%
                           dplyr::group_by(Year, SiteKey, SiteID, SiteName, PlotKey, PlotID, LineID, PointNbr, point.count,
                                           !!!grouping.variables) %>%
                           ## Here's the breakdown of the gnarly parts:
@@ -61,7 +61,7 @@ pct.cover <- function(lpi.tall,
                     },
                     "first" = {
                       if (year) {
-                        summary <- lpi.tall %>% dplyr::mutate(Year = format(lubridate::as_date(DateModified), "%Y")) %>%
+                        summary <- lpi.tall %>% dplyr::mutate(Year = format(lubridate::as_date(FormDate), "%Y")) %>%
                           # Strip out all the non-hit codes
                           dplyr::filter(!(code %in% c("", NA, "None"))) %>%
                           dplyr::group_by(Year, SiteKey, PlotKey, LineID, PointNbr, point.count) %>%
