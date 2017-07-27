@@ -100,14 +100,32 @@ gather.lpi <- function(dima.tables,
                                     all = TRUE))
 
   ## Make an AIM height data frame
-  lpi.habitheight.tall <- dplyr::select(.data = lpi.restricted,
-                                        DateModified,
-                                        dplyr::starts_with("site", ignore.case = TRUE),
-                                        dplyr::starts_with("plot", ignore.case = TRUE),
-                                        dplyr::starts_with("line", ignore.case = TRUE),
-                                        PointLoc,
-                                        PointNbr,
-                                        dplyr::matches("Woody$|Herbaceous$"))
+  lpi.habitheight.tall.woody <- dplyr::select(.data = lpi.restricted,
+                                              DateModified,
+                                              dplyr::starts_with("site", ignore.case = TRUE),
+                                              dplyr::starts_with("plot", ignore.case = TRUE),
+                                              dplyr::starts_with("line", ignore.case = TRUE),
+                                              PointLoc,
+                                              PointNbr,
+                                              dplyr::matches("Woody$"))
+  ## Strip out the extra name stuff so woody and herbaceous variable names will match.
+  names(lpi.habitheight.tall.woody) <- stringr::str_replace_all(string = names(lpi.habitheight.tall.woody),
+                                                                pattern = "Woody$",
+                                                                replacement = "")
+
+  lpi.habitheight.tall.herb <- dplyr::select(.data = lpi.restricted,
+                                             DateModified,
+                                             dplyr::starts_with("site", ignore.case = TRUE),
+                                             dplyr::starts_with("plot", ignore.case = TRUE),
+                                             dplyr::starts_with("line", ignore.case = TRUE),
+                                             PointLoc,
+                                             PointNbr,
+                                             dplyr::matches("Herbaceous$"))
+  names(lpi.habitheight.tall.herb) <- stringr::str_replace_all(string = names(lpi.habitheight.tall.herb),
+                                                               pattern = "Herbaceous$",
+                                                               replacement = "")
+
+  lpi.habit.height <- rbind(lpi.habitheight.tall.woody, lpi.habitheight.tall.herb)
 
   ## If we're adding species
   if (species.characteristics) {
@@ -134,24 +152,13 @@ gather.lpi <- function(dima.tables,
                       all.x = TRUE)
 
     ## Do the same for the habitat height data, but woody then herbaceous
-    lpi.habitheight.tall <- merge(x = lpi.habitheight.tall,
+    lpi.habit.height <- merge(x = lpi.habit.height,
                                   y = species,
-                                  by.x = "SpeciesWoody",
+                                  by.x = "Species",
                                   by.y = "SpeciesCode",
                                   all.x = TRUE)
-
-    ## Because we need to rename these to end in Woody and Herbaceous to match what they go with
-    names(lpi.habitheight.tall)[names(lpi.habitheight.tall) %in% names(species)] <- paste0(names(lpi.habitheight.tall)[names(lpi.habitheight.tall) %in% names(species)], "Woody")
-
-    lpi.habitheight.tall <- merge(x = lpi.habitheight.tall,
-                                  y = species,
-                                  by.x = "SpeciesHerbaceous",
-                                  by.y = "SpeciesCode",
-                                  all.x = TRUE)
-
-    names(lpi.habitheight.tall)[names(lpi.habitheight.tall) %in% names(species)] <- paste0(names(lpi.habitheight.tall)[names(lpi.habitheight.tall) %in% names(species)], "Herbaceous")
   }
 
   ## Output the list
-  output <- list("layers" = lpi.tall, "heights" = lpi.habitheight.tall)
+  output <- list("layers" = lpi.tall, "heights" = lpi.habit.height)
 }
