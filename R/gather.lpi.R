@@ -11,7 +11,7 @@ gather.lpi <- function(dima.tables,
                        species.characteristics = TRUE){
   if (meta) {
     ## Merge the site, plot, and line details with the LPI data
-    lpi <- metamerge(dima.tables = dima.tables, "LPI")
+    lpi <- metamerge(dima.tables = dima.tables, "LPI", minimum = TRUE)
   } else {
     lpi <- merge(dima.tables$tblLPIHeader, dima.tables$tblLPIDetail)
   }
@@ -19,7 +19,7 @@ gather.lpi <- function(dima.tables,
 
   ## Strip out most of the variables because they're not relevant
   lpi.restricted <- dplyr::select(.data = lpi,
-                                  DateModified,
+                                  FormDate,
                                   dplyr::starts_with("site", ignore.case = TRUE),
                                   dplyr::starts_with("plot", ignore.case = TRUE),
                                   dplyr::starts_with("line", ignore.case = TRUE),
@@ -36,7 +36,7 @@ gather.lpi <- function(dima.tables,
 
   ## Make a tall data frame with the site-plot-line-point identifiers and the hit codes by layer
   lpi.hits.tall <- tidyr::gather(data = dplyr::select(.data = lpi.restricted,
-                                                      DateModified,
+                                                      FormDate,
                                                       dplyr::starts_with("site", ignore.case = TRUE),
                                                       dplyr::starts_with("plot", ignore.case = TRUE),
                                                       dplyr::starts_with("line", ignore.case = TRUE),
@@ -51,7 +51,7 @@ gather.lpi <- function(dima.tables,
 
   ## Make a tall data frame with the site-plot-line-point identifiers and the checkbox status by layer
   lpi.chkbox.tall <- tidyr::gather(data = dplyr::select(.data = lpi.restricted,
-                                                        DateModified,
+                                                        FormDate,
                                                         dplyr::starts_with("site", ignore.case = TRUE),
                                                         dplyr::starts_with("plot", ignore.case = TRUE),
                                                         dplyr::starts_with("line", ignore.case = TRUE),
@@ -101,26 +101,26 @@ gather.lpi <- function(dima.tables,
 
   ## Make an AIM height data frame
   lpi.habitheight.tall.woody <- dplyr::select(.data = lpi.restricted,
-                                              DateModified,
+                                              FormDate,
                                               dplyr::starts_with("site", ignore.case = TRUE),
                                               dplyr::starts_with("plot", ignore.case = TRUE),
                                               dplyr::starts_with("line", ignore.case = TRUE),
                                               PointLoc,
                                               PointNbr,
-                                              dplyr::matches("Woody$"))
+                                              dplyr::matches("Woody$")) %>% dplyr::mutate(type = "woody")
   ## Strip out the extra name stuff so woody and herbaceous variable names will match.
   names(lpi.habitheight.tall.woody) <- stringr::str_replace_all(string = names(lpi.habitheight.tall.woody),
                                                                 pattern = "Woody$",
                                                                 replacement = "")
 
   lpi.habitheight.tall.herb <- dplyr::select(.data = lpi.restricted,
-                                             DateModified,
+                                             FormDate,
                                              dplyr::starts_with("site", ignore.case = TRUE),
                                              dplyr::starts_with("plot", ignore.case = TRUE),
                                              dplyr::starts_with("line", ignore.case = TRUE),
                                              PointLoc,
                                              PointNbr,
-                                             dplyr::matches("Herbaceous$"))
+                                             dplyr::matches("Herbaceous$")) %>% dplyr::mutate(type = "herbaceous")
   names(lpi.habitheight.tall.herb) <- stringr::str_replace_all(string = names(lpi.habitheight.tall.herb),
                                                                pattern = "Herbaceous$",
                                                                replacement = "")
