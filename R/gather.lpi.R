@@ -11,7 +11,7 @@ gather.lpi <- function(dima.tables,
                        species.characteristics = TRUE){
   if (meta) {
     ## Merge the site, plot, and line details with the LPI data
-    lpi <- metamerge(dima.tables = dima.tables, "LPI")
+    lpi <- metamerge(dima.tables = dima.tables, "LPI", minimum = TRUE)
   } else {
     lpi <- merge(dima.tables$tblLPIHeader, dima.tables$tblLPIDetail)
   }
@@ -19,6 +19,7 @@ gather.lpi <- function(dima.tables,
 
   ## Strip out most of the variables because they're not relevant
   lpi.restricted <- dplyr::select(.data = lpi,
+                                  FormDate,
                                   dplyr::starts_with("site", ignore.case = TRUE),
                                   dplyr::starts_with("plot", ignore.case = TRUE),
                                   dplyr::starts_with("line", ignore.case = TRUE),
