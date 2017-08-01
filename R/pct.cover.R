@@ -4,20 +4,28 @@
 #' @param ... One or more bare variable name from \code{lpi.tall} to calculate percent cover for, e.g. \code{GrowthHabitSub} to calculate percent cover by growth habits or \code{GrowthHabitSub, Duration} to calculate percent cover for categories like perennial forbs, annual graminoids, etc.
 #' @param tall Logical. If \code{TRUE} then the returned data frame will be tall rather than wide and will not have observations for non-existent values e.g., if no data fell into a group on a plot, there will be no row for that group on that plot. Defaults to \code{FALSE}.
 #' @param hit Character string. If \code{"any"} then percent cover will be calculated using any hit in the canopy column (so a single pin drop record may be counted more than once if it had hits that corresponded to different groups). If \code{"first"} then only the first canopy hit at a pin drop will be used to calculate cover. Defaults to \code{"any"}.
-#' @param year Logical. If \code{TRUE} then results will be reported grouped by year using the \code{DateModified} field from the data forms. Defaults to \code{FALSE}.
+#' @param by.year Logical. If \code{TRUE} then results will be reported further grouped by year using the \code{DateModified} field from the data forms. Defaults to \code{FALSE}.
+#' @param by.line Logical. If \code{TRUR} then results will be reported further grouped by line using the \code{LineID} and \code{LineKey} fields from the data forms. Defaults to \code{FALSE}.
 #' @export
 pct.cover <- function(lpi.tall,
                       tall = FALSE,
                       hit = "any",
-                      year = FALSE,
+                      by.year = FALSE,
+                      by.line = FALSE,
                       ...){
   ## Get a list of the variables the user wants to group by.
   grouping.variables <- rlang::quos(...)
 
+  if (by.line) {
+    level <- rlang::quos(PlotKey, PlotID, LineKey, LineID)
+  } else {
+    level <- rlang::quos(PlotKey, PlotID)
+  }
+
   # Within a plot, we need the number of pin drops, which we'll calculate by sorting the
   # values then taking the last [number of lines on the plot] values
   point.totals <- lpi.tall %>%
-    dplyr::group_by(SiteKey, SiteID, SiteName, PlotKey) %>%
+    dplyr::group_by(SiteKey, SiteID, SiteName, !!!level) %>%
     dplyr::summarize(point.count = sum(tail(sort(PointNbr), length(unique(LineID)))))
 
   # Add the point.counts field (it'll be the same for every record associated with a plot)
@@ -27,16 +35,16 @@ pct.cover <- function(lpi.tall,
 
   summary <- switch(hit,
                     "any" = {
-                      if (year) {
+                      if (by.year) {
                         summary <- lpi.tall %>% dplyr::mutate(Year = format(lubridate::as_date(FormDate), "%Y")) %>%
-                          dplyr::group_by(Year, SiteKey, SiteID, SiteName, PlotKey, PlotID, LineID, PointNbr, point.count,
+                          dplyr::group_by(Year, SiteKey, SiteID, SiteName, PlotKey, PlotID, LineKey, LineID, PointNbr, point.count,
                                           !!!grouping.variables) %>%
                           ## Here's the breakdown of the gnarly parts:
                           # Because this is a tall format, we want just presence/absence for the grouping at a given point
                           # so we'll write in 1 if any of the layers within that grouping has a non-NA and non-"" value
                           dplyr::summarize(present = if(any(!is.na(code) & code != "")){1} else {0}) %>%
                           tidyr::unite(grouping, !!!grouping.variables, sep = ".") %>%
-                          dplyr::ungroup() %>% dplyr::group_by(SiteKey, SiteID, SiteName, PlotKey, PlotID, grouping) %>%
+                          dplyr::ungroup() %>% dplyr::group_by(SiteKey, SiteID, SiteName, !!!level, grouping) %>%
                           # Within a plot, find the sum of all the "presents" then divide by the number of possible hits, which
                           # we added in point.count
                           dplyr::summarize(percent = 100*sum(present, na.rm = TRUE)/first(point.count)) %>%
@@ -44,14 +52,14 @@ pct.cover <- function(lpi.tall,
                           dplyr::filter(!grepl(grouping, pattern = "^[NA.]{0,100}NA$"))
                       } else {
                         summary <- lpi.tall %>%
-                          dplyr::group_by(SiteKey, SiteID, SiteName, PlotKey, PlotID, LineID, PointNbr, point.count,
+                          dplyr::group_by(SiteKey, SiteID, SiteName, PlotKey, PlotID, LineKey, LineID, PointNbr, point.count,
                                           !!!grouping.variables) %>%
                           ## Here's the breakdown of the gnarly parts:
                           # Because this is a tall format, we want just presence/absence for the grouping at a given point
                           # so we'll write in 1 if any of the layers within that grouping has a non-NA and non-"" value
                           dplyr::summarize(present = if(any(!is.na(code) & code != "")){1} else {0}) %>%
                           tidyr::unite(grouping, !!!grouping.variables, sep = ".") %>%
-                          dplyr::ungroup() %>% dplyr::group_by(SiteKey, SiteID, SiteName, PlotKey, PlotID, grouping) %>%
+                          dplyr::ungroup() %>% dplyr::group_by(SiteKey, SiteID, SiteName, !!!level, grouping) %>%
                           # Within a plot, find the sum of all the "presents" then divide by the number of possible hits, which
                           # we added in point.count
                           dplyr::summarize(percent = 100*sum(present, na.rm = TRUE)/first(point.count)) %>%
@@ -60,7 +68,7 @@ pct.cover <- function(lpi.tall,
                       }
                     },
                     "first" = {
-                      if (year) {
+                      if (by.year) {
                         summary <- lpi.tall %>% dplyr::mutate(Year = format(lubridate::as_date(FormDate), "%Y")) %>%
                           # Strip out all the non-hit codes
                           dplyr::filter(!(code %in% c("", NA, "None"))) %>%
@@ -68,11 +76,11 @@ pct.cover <- function(lpi.tall,
                           # Get the first hit at a point
                           dplyr::summarize(code = first(code)) %>%
                           # Get all the other fields back
-                          merge(x = dplyr::distinct(dplyr::select(lpi.tall, SiteKey, SiteID, SiteName, PlotKey, PlotID, LineID, PointNbr, code, !!!grouping.variables)),
+                          merge(x = dplyr::distinct(dplyr::select(lpi.tall, SiteKey, SiteID, SiteName, PlotKey, PlotID, LineKey, LineID, PointNbr, code, !!!grouping.variables)),
                                 y = .,
                                 all.y = TRUE) %>%
                           tidyr::unite(grouping, !!!grouping.variables, sep = ".") %>%
-                          dplyr::ungroup() %>% dplyr::group_by(Year, SiteKey, SiteID, SiteName, PlotKey, PlotID, grouping) %>%
+                          dplyr::ungroup() %>% dplyr::group_by(Year, SiteKey, SiteID, SiteName, !!!level, grouping) %>%
                           dplyr::summarize(percent = 100*n()/first(point.count)) %>%
                           dplyr::filter(!grepl(grouping, pattern = "^[NA.]{0,100}NA$"))
                       } else {
@@ -83,11 +91,11 @@ pct.cover <- function(lpi.tall,
                           # Get the first hit at a point
                           dplyr::summarize(code = first(code)) %>%
                           # Get all the other fields back
-                          merge(x = dplyr::distinct(dplyr::select(lpi.tall, SiteKey, SiteID, SiteName, PlotKey, PlotID, LineID, PointNbr, code, !!!grouping.variables)),
+                          merge(x = dplyr::distinct(dplyr::select(lpi.tall, SiteKey, SiteID, SiteName, PlotKey, PlotID, LineKey, LineID, PointNbr, code, !!!grouping.variables)),
                                 y = .,
                                 all.y = TRUE) %>%
                           tidyr::unite(grouping, !!!grouping.variables, sep = ".") %>%
-                          dplyr::ungroup() %>% dplyr::group_by(SiteKey, SiteID, SiteName, PlotKey, PlotID, grouping) %>%
+                          dplyr::ungroup() %>% dplyr::group_by(SiteKey, SiteID, SiteName, !!!level, grouping) %>%
                           dplyr::summarize(percent = 100*n()/first(point.count)) %>%
                           dplyr::filter(!grepl(grouping, pattern = "^[NA.]{0,100}NA$"))
                       }
@@ -100,8 +108,8 @@ pct.cover <- function(lpi.tall,
       ## Replace the NA values with 0s because they represent 0% cover for that grouping
       tidyr::replace_na(replace = setNames(as.list(rep.int(0,
                                                            # Make a list of 0s named with the newly-created field names for replace_na()
-                                                           times = length(unique(names(.)[!(names(.) %in% c("Year", "SiteKey", "SiteID", "SiteName", "PlotKey", "PlotID"))])))),
-                                           unique(names(.)[!(names(.) %in% c("Year", "SiteKey", "SiteID", "SiteName", "PlotKey", "PlotID"))])))
+                                                           times = length(unique(names(.)[!(names(.) %in% c("Year", "SiteKey", "SiteID", "SiteName", "PlotKey", "PlotID", "LineKey", "LineID"))])))),
+                                           unique(names(.)[!(names(.) %in% c("Year", "SiteKey", "SiteID", "SiteName", "PlotKey", "PlotID", "LineKey", "LineID"))])))
   }
 
   return(summary)
