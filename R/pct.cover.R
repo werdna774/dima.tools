@@ -16,6 +16,7 @@ pct.cover <- function(lpi.tall,
   ## Get a list of the variables the user wants to group by.
   grouping.variables <- rlang::quos(...)
 
+  # For how deep to group. Always by plot, sometimes by line
   if (by.line) {
     level <- rlang::quos(PlotKey, PlotID, LineKey, LineID)
   } else {
