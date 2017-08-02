@@ -23,6 +23,9 @@ pct.cover <- function(lpi.tall,
                     y = point.totals,
                     all.x = TRUE)
 
+  # Remove NA values in code
+  lpi.tall<-lpi.tall[!is.na(lpi.tall$code)&lpi.tall$code!="",]
+
   summary <- switch(hit,
                     "any" = {lpi.tall %>%
                         dplyr::group_by(SiteKey, SiteID, SiteName, PlotKey, PlotID, LineID, PointNbr, point.count,
