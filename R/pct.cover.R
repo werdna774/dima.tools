@@ -34,6 +34,13 @@ pct.cover <- function(lpi.tall,
                     y = point.totals,
                     all.x = TRUE)
 
+  # Get the layers into the correct order
+  lpi.tall <- dplyr::group_by(.data = lpi.tall, FormDate, SiteKey, SiteID, SiteName, PlotKey, PlotID, LineKey, LineID, PointNbr) %>%
+    dplyr::mutate(layer = factor(layer,
+                                 levels = c("TopCanopy",
+                                            unique(lpi.tall$layer)[grepl(unique(lpi.tall$layer), pattern = "^Lower[1-7]")],
+                                            "SoilSurface"))) %>% dplyr::arrange(layer, .by_group = TRUE) %>% dplyr::ungroup()
+
   summary <- switch(hit,
                     "any" = {
                       if (by.year) {
