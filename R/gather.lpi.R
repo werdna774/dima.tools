@@ -47,7 +47,7 @@ gather.lpi <- function(dima.tables,
                                                       SoilSurface),
                                  key = "layer",
                                  value = "code",
-                                 -(SiteKey:PointNbr))
+                                 -(SiteKey:PointNbr), -FormDate)
 
   ## Make a tall data frame with the site-plot-line-point identifiers and the checkbox status by layer
   lpi.chkbox.tall <- tidyr::gather(data = dplyr::select(.data = lpi.restricted,
@@ -61,7 +61,7 @@ gather.lpi <- function(dima.tables,
                                                         -dplyr::matches("Woody$|Herbaceous$")),
                                    key = "layer",
                                    value = "checkbox",
-                                   -(SiteKey:PointNbr))
+                                   -(SiteKey:PointNbr), -FormDate)
 
   ## Make the names in the layer variable match
   lpi.chkbox.tall$layer <- stringr::str_replace_all(string = lpi.chkbox.tall$layer,
@@ -73,6 +73,7 @@ gather.lpi <- function(dima.tables,
 
   ## Make a tall data frame with the site-plot-line-point identifiers and the heights by layer
   lpi.layerheight.tall <- tidyr::gather(data = dplyr::select(.data = lpi.restricted,
+                                                             FormDate,
                                                              dplyr::starts_with("site", ignore.case = TRUE),
                                                              dplyr::starts_with("plot", ignore.case = TRUE),
                                                              dplyr::starts_with("line", ignore.case = TRUE),
@@ -82,7 +83,7 @@ gather.lpi <- function(dima.tables,
                                                              -dplyr::matches("Woody$|Herbaceous$")),
                                         key = "layer",
                                         value = "layer.height",
-                                        -(SiteKey:PointNbr))
+                                        -(SiteKey:PointNbr), -FormDate)
 
   ## Make the names in the layer variable match
   lpi.layerheight.tall$layer <- stringr::str_replace_all(string = lpi.layerheight.tall$layer,
