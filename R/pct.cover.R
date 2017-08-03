@@ -113,7 +113,40 @@ pct.cover <- function(lpi.tall,
                           dplyr::summarize(percent = 100*n()/first(point.count)) %>%
                           dplyr::filter(!grepl(grouping, pattern = "^[NA.]{0,100}NA$"))
                       }
-                    })
+                    },
+                    "basal" = {
+                      if (by.year) {
+                        summary <- lpi.tall %>% dplyr::filter(layer = "SoilSurface") %>%
+                          dplyr::mutate(Year = format(lubridate::as_date(FormDate), "%Y")) %>%
+                          dplyr::group_by(Year, SiteKey, SiteID, SiteName, PlotKey, PlotID, LineKey, LineID, PointNbr, point.count,
+                                          !!!grouping.variables) %>%
+                          ## Here's the breakdown of the gnarly parts:
+                          # Because this is a tall format, we want just presence/absence for the grouping at a given point
+                          # so we'll write in 1 if any of the layers within that grouping has a non-NA and non-"" value
+                          dplyr::summarize(present = if(any(!is.na(code) & code != "")){1} else {0}) %>%
+                          tidyr::unite(grouping, !!!grouping.variables, sep = ".") %>%
+                          dplyr::ungroup() %>% dplyr::group_by(SiteKey, SiteID, SiteName, !!!level, grouping) %>%
+                          # Within a plot, find the sum of all the "presents" then divide by the number of possible hits, which
+                          # we added in point.count
+                          dplyr::summarize(percent = 100*sum(present, na.rm = TRUE)/first(point.count)) %>%
+                          ## Remove the empty groupings—that is the ones where all the grouping variable values were NA
+                          dplyr::filter(!grepl(grouping, pattern = "^[NA.]{0,100}NA$"))
+                      } else {
+                        summary <- lpi.tall %>% dplyr::filter(layer = "SoilSurface") %>%
+                          dplyr::group_by(SiteKey, SiteID, SiteName, PlotKey, PlotID, LineKey, LineID, PointNbr, point.count,
+                                          !!!grouping.variables) %>%
+                          ## Here's the breakdown of the gnarly parts:
+                          # Because this is a tall format, we want just presence/absence for the grouping at a given point
+                          # so we'll write in 1 if any of the layers within that grouping has a non-NA and non-"" value
+                          dplyr::summarize(present = if(any(!is.na(code) & code != "")){1} else {0}) %>%
+                          tidyr::unite(grouping, !!!grouping.variables, sep = ".") %>%
+                          dplyr::ungroup() %>% dplyr::group_by(SiteKey, SiteID, SiteName, !!!level, grouping) %>%
+                          # Within a plot, find the sum of all the "presents" then divide by the number of possible hits, which
+                          # we added in point.count
+                          dplyr::summarize(percent = 100*sum(present, na.rm = TRUE)/first(point.count)) %>%
+                          ## Remove the empty groupings—that is the ones where all the grouping variable values were NA
+                          dplyr::filter(!grepl(grouping, pattern = "^[NA.]{0,100}NA$"))
+                      })
 
 
 
