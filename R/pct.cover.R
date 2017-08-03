@@ -26,7 +26,8 @@ pct.cover <- function(lpi.tall,
   # Drop data where there is no code value (i.e. layers where there was no recorded hit)
   lpi.tall <- dplyr::filter(.data = lpi.tall,
                             !is.na(code),
-                            code != "")
+                            code != "",
+                            code != "None")
 
   # Within a plot, we need the number of pin drops, which we'll calculate by sorting the
   # values then taking the last [number of lines on the plot] values
