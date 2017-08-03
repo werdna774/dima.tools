@@ -35,7 +35,8 @@ pct.cover <- function(lpi.tall,
                     all.x = TRUE)
 
   # Get the layers into the correct order
-  lpi.tall <- dplyr::mutate(layer = factor(layer,
+  lpi.tall <- dplyr::mutate(.data = lpi.tall,
+                            layer = factor(layer,
                                  levels = c("TopCanopy",
                                             unique(lpi.tall$layer)[grepl(unique(lpi.tall$layer), pattern = "^Lower[1-7]")],
                                             "SoilSurface"))) %>% dplyr::arrange(layer)
