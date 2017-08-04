@@ -1,6 +1,4 @@
 #' Percent Cover Indicators
-#'
-#'
 #' @description Calculate the percent cover  indicators by plot or line for variables or combinations of variables.This is a family of standard indicator variables to examine total foliar cover, bare soil, litter cover, and other ground cover indicators. To compute cover by species, growth habit and duration, or other custom line-point intercept combinations, see \code{pct.cover()}.
   #' @param lpi.tall A tall/long-format data frame. Use the data frame \code{"layers"} from the \code{gather.lpi()} output.
   #' @param tall Logical. If \code{TRUE} then the returned data frame will be tall rather than wide and will not have observations for non-existent values e.g., if no data fell into a group on a plot, there will be no row for that group on that plot. Defaults to \code{FALSE}.
@@ -10,6 +8,9 @@
   #' @return A \code{tbl} of either wide or tall format.
 
 
+
+#' @export
+#' @rdname cover.indicators
 # Percent Cover Between Plants####
 #This function assumes that all non-plant codes are <3 characters long
 pct.cover.between.plant<-function(lpi.tall, tall=FALSE, by.year=FALSE, by.line=FALSE){
@@ -28,7 +29,6 @@ pct.cover.between.plant<-function(lpi.tall, tall=FALSE, by.year=FALSE, by.line=F
   }
   return(summary)
   }
-
 #' @export
 #' @rdname cover.indicators
 
@@ -113,6 +113,5 @@ pct.cover.litter<-function(lpi.tall, tall=FALSE, by.year=FALSE, by.line=FALSE){
 
   return(summary)
 }
-#' @export
-#' @rdname cover.indicators
+
 
