@@ -1,5 +1,5 @@
 #' Calculating percent cover from LPI data.
-#' @description Calculate the percent cover by plot for variables or combinations of variables. Percent cover will be calculated for every combination of the variables requested, so if the variables are \code{GrowthHabitSub} and \code{Duration} then the output will contain fields like \code{Graminoid.Perennial}, \code{Graminoid.Annual}, \code{Shrub.Perennial}, etc. whereas using just the variable \code{code} will produce one column per species code. Any number of grouping variables can be used. These are calculated as cover from anywhere in the canopy column or as only the first hit in the canopy column. Any groupings where all the variable values were \code{NA} will be dropped.
+#' @description Calculate the percent cover by plot for variables or combinations of variables. Percent cover will be calculated for every combination of the variables requested, so if the variables are \code{GrowthHabitSub} and \code{Duration} then the output will contain fields like \code{Graminoid.Perennial}, \code{Graminoid.Annual}, \code{Shrub.Perennial}, etc. whereas using just the variable \code{code} will produce one column per species code. Any number of indicator variables can be used. These are calculated as cover from anywhere in the canopy column or as only the first hit in the canopy column. Any groupings where all the variable values were \code{NA} will be dropped.
 #' @param lpi.tall A tall/long-format data frame. Use the data frame \code{"layers"} from the \code{gather.lpi()} output.
 #' @param ... One or more bare variable name from \code{lpi.tall} to calculate percent cover for, e.g. \code{GrowthHabitSub} to calculate percent cover by growth habits or \code{GrowthHabitSub, Duration} to calculate percent cover for categories like perennial forbs, annual graminoids, etc.
 #' @param tall Logical. If \code{TRUE} then the returned data frame will be tall rather than wide and will not have observations for non-existent values e.g., if no data fell into a group on a plot, there will be no row for that group on that plot. Defaults to \code{FALSE}.
@@ -63,28 +63,28 @@ pct.cover <- function(lpi.tall,
                           # Because this is a tall format, we want just presence/absence for the grouping at a given point
                           # so we'll write in 1 if any of the layers within that grouping has a non-NA and non-"" value
                           dplyr::summarize(present = if(any(!is.na(code) & code != "")){1} else {0}) %>%
-                          tidyr::unite(grouping, !!!grouping.variables, sep = ".") %>%
-                          dplyr::ungroup() %>% dplyr::group_by(SiteKey, SiteID, SiteName, !!!level, grouping) %>%
+                          tidyr::unite(indicator, !!!grouping.variables, sep = ".") %>%
+                          dplyr::ungroup() %>% dplyr::group_by(SiteKey, SiteID, SiteName, !!!level, indicator) %>%
                           # Within a plot, find the sum of all the "presents" then divide by the number of possible hits, which
                           # we added in point.count
                           dplyr::summarize(percent = 100*sum(present, na.rm = TRUE)/first(point.count)) %>%
-                          ## Remove the empty groupings—that is the ones where all the grouping variable values were NA
-                          dplyr::filter(!grepl(grouping, pattern = "^[NA.]{0,100}NA$"))
+                          ## Remove the empty groupings—that is the ones where all the indicator variable values were NA
+                          dplyr::filter(!grepl(indicator, pattern = "^[NA.]{0,100}NA$"))
                       } else {
                         summary <- lpi.tall %>%
                           dplyr::group_by(SiteKey, SiteID, SiteName, PlotKey, PlotID, LineKey, LineID, PointNbr, point.count,
                                           !!!grouping.variables) %>%
                           ## Here's the breakdown of the gnarly parts:
-                          # Because this is a tall format, we want just presence/absence for the grouping at a given point
-                          # so we'll write in 1 if any of the layers within that grouping has a non-NA and non-"" value
+                          # Because this is a tall format, we want just presence/absence for the indicator at a given point
+                          # so we'll write in 1 if any of the layers within that indicator has a non-NA and non-"" value
                           dplyr::summarize(present = if(any(!is.na(code) & code != "")){1} else {0}) %>%
-                          tidyr::unite(grouping, !!!grouping.variables, sep = ".") %>%
-                          dplyr::ungroup() %>% dplyr::group_by(SiteKey, SiteID, SiteName, !!!level, grouping) %>%
+                          tidyr::unite(indicator, !!!grouping.variables, sep = ".") %>%
+                          dplyr::ungroup() %>% dplyr::group_by(SiteKey, SiteID, SiteName, !!!level, indicator) %>%
                           # Within a plot, find the sum of all the "presents" then divide by the number of possible hits, which
                           # we added in point.count
                           dplyr::summarize(percent = 100*sum(present, na.rm = TRUE)/first(point.count)) %>%
-                          ## Remove the empty groupings—that is the ones where all the grouping variable values were NA
-                          dplyr::filter(!grepl(grouping, pattern = "^[NA.]{0,100}NA$"))
+                          ## Remove the empty groupings—that is the ones where all the indicator variable values were NA
+                          dplyr::filter(!grepl(indicator, pattern = "^[NA.]{0,100}NA$"))
                       }
                     },
                     "first" = {
@@ -99,10 +99,10 @@ pct.cover <- function(lpi.tall,
                           merge(x = dplyr::distinct(dplyr::select(lpi.tall, SiteKey, SiteID, SiteName, PlotKey, PlotID, LineKey, LineID, PointNbr, code, !!!grouping.variables)),
                                 y = .,
                                 all.y = TRUE) %>%
-                          tidyr::unite(grouping, !!!grouping.variables, sep = ".") %>%
-                          dplyr::ungroup() %>% dplyr::group_by(Year, SiteKey, SiteID, SiteName, !!!level, grouping) %>%
+                          tidyr::unite(indicator, !!!grouping.variables, sep = ".") %>%
+                          dplyr::ungroup() %>% dplyr::group_by(Year, SiteKey, SiteID, SiteName, !!!level, indicator) %>%
                           dplyr::summarize(percent = 100*n()/first(point.count)) %>%
-                          dplyr::filter(!grepl(grouping, pattern = "^[NA.]{0,100}NA$"))
+                          dplyr::filter(!grepl(indicator, pattern = "^[NA.]{0,100}NA$"))
                       } else {
                         summary <- lpi.tall %>%
                           # Strip out all the non-hit codes
@@ -114,18 +114,18 @@ pct.cover <- function(lpi.tall,
                           merge(x = dplyr::distinct(dplyr::select(lpi.tall, SiteKey, SiteID, SiteName, PlotKey, PlotID, LineKey, LineID, PointNbr, code, !!!grouping.variables)),
                                 y = .,
                                 all.y = TRUE) %>%
-                          tidyr::unite(grouping, !!!grouping.variables, sep = ".") %>%
-                          dplyr::ungroup() %>% dplyr::group_by(SiteKey, SiteID, SiteName, !!!level, grouping) %>%
+                          tidyr::unite(indicator, !!!grouping.variables, sep = ".") %>%
+                          dplyr::ungroup() %>% dplyr::group_by(SiteKey, SiteID, SiteName, !!!level, indicator) %>%
                           dplyr::summarize(percent = 100*n()/first(point.count)) %>%
-                          dplyr::filter(!grepl(grouping, pattern = "^[NA.]{0,100}NA$"))
+                          dplyr::filter(!grepl(indicator, pattern = "^[NA.]{0,100}NA$"))
                       }
                     })
 
 
 
   if (!tall) {
-    summary <- tidyr::spread(summary, key = grouping, value = percent) %>%
-      ## Replace the NA values with 0s because they represent 0% cover for that grouping
+    summary <- tidyr::spread(summary, key = indicator, value = percent) %>%
+      ## Replace the NA values with 0s because they represent 0% cover for that indicator
       tidyr::replace_na(replace = setNames(as.list(rep.int(0,
                                                            # Make a list of 0s named with the newly-created field names for replace_na()
                                                            times = length(unique(names(.)[!(names(.) %in% c("Year", "SiteKey", "SiteID", "SiteName", "PlotKey", "PlotID", "LineKey", "LineID"))])))),
