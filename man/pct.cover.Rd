@@ -2,9 +2,10 @@
 % Please edit documentation in R/pct.cover.R
 \name{pct.cover}
 \alias{pct.cover}
-\title{Calculating percent cover (any hit) from LPI data.}
+\title{Calculating percent cover from LPI data.}
 \usage{
-pct.cover(lpi.tall, tall = FALSE, hit = "any", ...)
+pct.cover(lpi.tall, tall = FALSE, hit = "any", by.year = FALSE,
+  by.line = FALSE, ...)
 }
 \arguments{
 \item{lpi.tall}{A tall/long-format data frame. Use the data frame \code{"layers"} from the \code{gather.lpi()} output.}
@@ -13,8 +14,12 @@ pct.cover(lpi.tall, tall = FALSE, hit = "any", ...)
 
 \item{hit}{Character string. If \code{"any"} then percent cover will be calculated using any hit in the canopy column (so a single pin drop record may be counted more than once if it had hits that corresponded to different groups). If \code{"first"} then only the first canopy hit at a pin drop will be used to calculate cover. Defaults to \code{"any"}.}
 
+\item{by.year}{Logical. If \code{TRUE} then results will be reported further grouped by year using the \code{DateModified} field from the data forms. Defaults to \code{FALSE}.}
+
+\item{by.line}{Logical. If \code{TRUR} then results will be reported further grouped by line using the \code{LineID} and \code{LineKey} fields from the data forms. Defaults to \code{FALSE}.}
+
 \item{...}{One or more bare variable name from \code{lpi.tall} to calculate percent cover for, e.g. \code{GrowthHabitSub} to calculate percent cover by growth habits or \code{GrowthHabitSub, Duration} to calculate percent cover for categories like perennial forbs, annual graminoids, etc.}
 }
 \description{
-Calculate the percent cover by plot for variables or combinations of variables. Percent cover will be calculated for every combination of the variables requested, so if the variables are \code{GrowthHabitSub} and \code{Duration} then the output will contain fields like \code{Graminoid.Perennial}, \code{Graminoid.Annual}, \code{Shrub.Perennial}, etc. whereas using just the variable \code{code} will produce one column per species code. Any number of grouping variables can be used. Because these are calculated as cover from anywhere in the canopy column, values for a plot will virtually always sum to > 100% due to multiple layers of vegetation occuring at pin drops. Any groupings where all the variable values were \code{NA} will be dropped.
+Calculate the percent cover by plot for variables or combinations of variables. Percent cover will be calculated for every combination of the variables requested, so if the variables are \code{GrowthHabitSub} and \code{Duration} then the output will contain fields like \code{Graminoid.Perennial}, \code{Graminoid.Annual}, \code{Shrub.Perennial}, etc. whereas using just the variable \code{code} will produce one column per species code. Any number of grouping variables can be used. These are calculated as cover from anywhere in the canopy column or as only the first hit in the canopy column. Any groupings where all the variable values were \code{NA} will be dropped.
 }
