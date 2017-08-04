@@ -1,13 +1,13 @@
 #' Percent Cover Indicators
 #'
 #'
-#' @description Calculate the percent cover  indicators by plot or line for variables or combinations of variables.This is a family of standard indicators \code{pct.cover.between.plant(),pct.cover.ground.cover(), pct.total.foliar(), pct.bare.soil() }. To compute cover by species, growth habit and duration, or other custom line-point intercept combinations, see \code{pct.cover()}.
+#' @description Calculate the percent cover  indicators by plot or line for variables or combinations of variables.This is a family of standard indicator variables to examine total foliar cover, bare soil, litter cover, and other ground cover indicators. To compute cover by species, growth habit and duration, or other custom line-point intercept combinations, see \code{pct.cover()}.
   #' @param lpi.tall A tall/long-format data frame. Use the data frame \code{"layers"} from the \code{gather.lpi()} output.
   #' @param tall Logical. If \code{TRUE} then the returned data frame will be tall rather than wide and will not have observations for non-existent values e.g., if no data fell into a group on a plot, there will be no row for that group on that plot. Defaults to \code{FALSE}.
   #' @param by.year Logical. If \code{TRUE} then results will be reported further grouped by year using the \code{DateModified} field from the data forms. Defaults to \code{FALSE}.
   #' @param by.line Logical. If \code{TRUR} then results will be reported further grouped by line using the \code{LineID} and \code{LineKey} fields from the data forms. Defaults to \code{FALSE}.
   #' @name cover.indicators
-
+  #' @return A \code{tbl} of either wide or tall format.
 
 
 # Percent Cover Between Plants####
