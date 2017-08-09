@@ -11,7 +11,7 @@ gap.cover <- function(dima.tables,
                  type="canopy") {
 
   gap.data <- metamerge(dima.tables = dima.tables,
-                        form = "Gap",
+                        form = "CanopyGap",
                         minimum = TRUE)
 
 
@@ -41,13 +41,13 @@ gap.cover <- function(dima.tables,
   }
   ##Note if this is Basal or Canopy Gap
   if (type=="canopy"){
-    gap.data<-gap.data[gap.data$RecType=="C"]
+    gap.data<-gap.data[gap.data$RecType=="C",]
     if (nrow(gap.data)==0) {
       stop("There are no canopy gap records. Did you intend to summarize basal gap?")
       }
   }
   if (type=="basal"){
-    gap.data<-gap.data[gap.data$RecType=="B"]
+    gap.data<-gap.data[gap.data$RecType=="B",]
     if (nrow(gap.data)==0) {
       stop("There are no basal gap records. Did you intend to summarize basal gap?")
     }
