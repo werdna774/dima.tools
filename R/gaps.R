@@ -1,49 +1,95 @@
-gaps <- function(dima.tables,
+#' Calculate the number, length, and percent of gaps
+#' @description Calculate the number, length, and percent of gaps by plot or line.
+#' @param dima.tables Raw tables as imported from a DIMA. Use data from \code{read.dima( all=T)}.
+#' @param tall Logical. If \code{TRUE} then the returned data frame will be tall rather than wide and will not have observations for non-existent values e.g., if no data fell into a group on a plot, there will be no row for that group on that plot. Defaults to \code{FALSE}.
+#' @param by.year Logical. If \code{TRUE} then results will be reported further grouped by year using the \code{DateModified} field from the data forms. Defaults to \code{FALSE}.
+#' @param by.line Logical. If \code{TRUR} then results will be reported further grouped by line using the \code{LineID} and \code{LineKey} fields from the data forms. Defaults to \code{FALSE}.
+#' @export
+
+
+#Percent Gap
+gap.cover <- function(dima.tables,
                  by.line = FALSE,
-                 tall = FALSE) {
+                 tall = FALSE,
+                 by.year=FALSE,
+                 breaks=c(20,25,50, 100, 200),
+                 type="canopy") {
 
   gap.data <- metamerge(dima.tables = dima.tables,
-                        form = "Gap",
+                        form = "CanopyGap",
                         minimum = TRUE)
 
-  ## Group for the correct set of variables
-  if (by.line){
-    gap.intermediate <- gap.data %>% dplyr::filter(!is.na(Gap)) %>% dplyr::group_by(SiteKey, SiteID, PlotKey, PlotID, LineKey, LineID, FormDate)
+
+
+  # For how deep to group. Always by plot, sometimes by line
+  if (by.line) {
+    level <- rlang::quos(SiteKey, SiteID, SiteName, PlotKey, PlotID, LineKey, LineID)
   } else {
-    gap.intermediate <- gap.data %>% dplyr::filter(!is.na(Gap)) %>% dplyr::group_by(SiteKey, SiteID, PlotKey, PlotID, FormDate)
+    level <- rlang::quos(SiteKey, SiteID, SiteName, PlotKey, PlotID)
+  }
+
+
+  # For grouping by year
+  if (by.year){
+    gap.data<-dplyr::mutate(gap.data, Year = format(lubridate::as_date(FormDate), "%Y"))
+    level<-rlang::quos(!!!level, Year)
   }
 
   ## Convert the line lengths to the same units as the gaps
-  gap.intermediate$LineLengthAmount[gap.intermediate$Measure == 1] <- 100 * gap.intermediate$LineLengthAmount[gap.intermediate$Measure == 1]
-  gap.intermediate$LineLengthAmount[gap.intermediate$Measure == 2] <- 12 * gap.intermediate$LineLengthAmount[gap.intermediate$Measure == 2]
+  #if metric (gap$Measure==1) then multiply by 100 to put the line length in centimeters
+  gap.data$LineLengthAmount[gap.data$Measure == 1] <- 100 * gap.data$LineLengthAmount[gap.data$Measure == 1]
+  #if English (gap$Measure==2) then multiply by 12 to put the line length in inches, then convert both the line length and measured gaps to metric
+  if(unique(gap.data$Measure) %in% 2){
+    gap.data$LineLengthAmount[gap.data$Measure == 2]<-gap.data$LineLengthAmount[gap.data$Measure == 2]*2.54
+    gap.data$Gap[gap.data$Measure == 2]<-gap.data$Gap[gap.data$Measure == 2]*2.54
+    gap.data$GapMin[gap.data$Measure == 2]<-gap.data$MinGap[gap.data$Measure == 2]*2.54
+  }
+  ##Note if this is Basal or Canopy Gap
+  if (type=="canopy"){
+    gap.data<-gap.data[gap.data$RecType=="C",]
+    if (nrow(gap.data)==0) {
+      stop("There are no canopy gap records. Did you intend to summarize basal gap?")
+      }
+  }
+  if (type=="basal"){
+    gap.data<-gap.data[gap.data$RecType=="B",]
+    if (nrow(gap.data)==0) {
+      stop("There are no basal gap records. Did you intend to summarize basal gap?")
+    }
+  }
+  #Gap lookup table
+  class.min<-c(0, breaks)
+  class.max<-c(breaks, max(gap.data$LineLengthAmount))
+  class<-data.frame(class.min, class.max)
+  class$indicator<-paste(class.min, "to", class.max, sep=".")
+  class$indicator[length(class$indicator)]<-gsub("\\..*]*", "plus", dplyr::last(class$indicator))
+
+  #Merge the indicator names into the gap data table
+  plots.indicator<-expand.grid(PlotKey=unique(gap.data$PlotKey), indicator=class$indicator)
+  gap.data.indicator<-merge(gap.data, plots.indicator)%>% merge(., class)
+
 
   ## Calculate indicators
-  gap.summary <- gap.intermediate %>%
-    dplyr::summarize(n.20to24 = length(Gap[(Gap >= 20 & Gap <= 24)]),
-                     n.26to50 = length(Gap[(Gap >= 25 & Gap <= 50)]),
-                     n.51to100 = length(Gap[(Gap > 50 & Gap <= 100)]),
-                     n.101to200 = length(Gap[(Gap > 100 & Gap <= 200)]),
-                     n.201plus = length(Gap[(Gap > 200)]),
-                     length.20to24 = sum(Gap[(Gap >= 20 & Gap <= 24)]),
-                     length.25to50 = sum(Gap[(Gap >= 25 & Gap <= 50)]),
-                     length.51to100 = sum(Gap[(Gap > 50 & Gap <= 100)]),
-                     length.101to200 = sum(Gap[(Gap > 100 & Gap <= 200)]),
-                     length.201plus = sum(Gap[(Gap > 200)]),
-                     length.total = tail(sort(LineLengthAmount), length(unique(LineKey)))) %>%
-    dplyr::mutate(pct.20to24 = 100*length.20to24/length.total,
-                  pct.25to50 = 100*length.25to50/length.total,
-                  pct.51to100 = 100*length.51to100/length.total,
-                  pct.101to200 = 100*length.101to200/length.total,
-                  pct.201plus = 100*length.201plus/length.total)
+  gap.summary <- gap.data.indicator  %>% dplyr::group_by(!!!level, LineKey, LineID, LineLengthAmount, indicator)%>%
+    #calculate number of gaps,total length of gaps, and percent of gaps in each indicator category
+    dplyr::summarize(n = length(Gap[Gap >= class.min & Gap < class.max]),
+                     length = sum(Gap[Gap >= class.min & Gap < class.max]))%>%
+    dplyr::mutate(.,percent=100*(length/LineLengthAmount))
 
-
-  if (tall) {
-    gap.summary <- tidyr::gather(gap.summary,
-                                 key = "indicator",
-                                 value = "value",
-                                 -(SiteKey:FormDate))
+  ## If by.line=FALSE, then take the mean of the lines to summarize the gap indicators to the plot level
+  if(by.line){
+  gap.summary<-gap.summary%>%dplyr::group_by(!!!level, LineLengthAmount, indicator)%>%
+    dplyr::summarize(n=mean(n),length=mean(length), percent=mean(percent))
   }
 
-  ##Notes for Nelson: This code assumes metric--not sure if we want to load in the tblHeader info so that we know if it is English or Metric
+  ##If tall=FALSE, then convert to wide format
+  if (!tall) {
+    percent <- tidyr::spread(gap.summary, key = indicator, value = percent, fill=0)%>% select(., -n,-length)
+    n<-tidyr::spread(gap.summary, key = indicator, value = n, fill=0)%>% select(., -percent,-length)
+    length<-tidyr::spread(gap.summary, key = indicator, value = length, fill=0)%>% select(., -n,-percent)
+    gap.summary<-list("percent"=percent, "n"=n, "length"=length)
+    }
+
   return(gap.summary)
 }
+

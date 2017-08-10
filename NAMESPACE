@@ -2,11 +2,13 @@
 
 export(common.species)
 export(extract.table)
+export(gap.cover)
 export(gather.lpi)
 export(metamerge)
 export(pct.cover)
 export(pct.cover.all.ground)
 export(pct.cover.bare.soil)
+export(pct.cover.between.plant)
 export(pct.cover.litter)
 export(pct.cover.total.foliar)
 export(read.dima)
