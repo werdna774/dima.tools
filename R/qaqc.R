@@ -501,12 +501,12 @@ check.dima <- function(dima.tables = NULL,
 }
 
 # All the species in PLANTS
-all.species <- read.csv("C:/Users/Nelson/Documents/Projects/dima.tools/inst/defaults/species.csv", stringsAsFactors = FALSE)
-
-# A list of the error data frames. There's not a good way to write them to Excel right now
-errors <- check.dima(dima.filepath = "C:/Users/Nelson/Desktop",
-                     dima.filename = "CRC_AIMTraining2016_COMBINED.mdb",
-                     all.species = all.species)
+# all.species <- read.csv("C:/Users/Nelson/Documents/Projects/dima.tools/inst/defaults/species.csv", stringsAsFactors = FALSE)
+#
+# # A list of the error data frames. There's not a good way to write them to Excel right now
+# errors <- check.dima(dima.filepath = "C:/Users/Nelson/Desktop",
+#                      dima.filename = "CRC_AIMTraining2016_COMBINED.mdb",
+#                      all.species = all.species)
 
 
 
