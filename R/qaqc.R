@@ -344,6 +344,20 @@ check.gap <- function(detail.table,
   gap.meta.group <- dplyr::group_by(.data = gap.meta,
                                     SiteID, PlotID, LineID, FormDate)
 
+  # DIMA variable names have changed for some inexplicable reason, so we force them here
+  if ("Perennials" %in% names(gap.meta)){
+    names(gap.meta)[names(gap.meta) == "Perennials"] <- "PerennialsCanopy"
+  }
+  if ("AnnualGrasses" %in% names(gap.meta)){
+    names(gap.meta)[names(gap.meta) == "AnnualGrasses"] <- "AnnualGrassesCanopy"
+  }
+  if ("AnnualForbs" %in% names(gap.meta)){
+    names(gap.meta)[names(gap.meta) == "AnnualForbs"] <- "AnnualForbsCanopy"
+  }
+  if ("Other" %in% names(gap.meta)){
+    names(gap.meta)[names(gap.meta) == "Other"] <- "OtherCanopy"
+  }
+
   # Summarize!
   group.meta.invalids <- dplyr::ungroup(dplyr::summarize(.data = gap.meta.group,
                                                          # Are there valid units?
@@ -353,7 +367,7 @@ check.gap <- function(detail.table,
                                                          # Are all the entries numeric?
                                                          invalid.entry.type = any(!is.numeric(GapStart) | !is.numeric(GapEnd)),
                                                          # Are the correct boxes ticked for canopies?
-                                                         invalid.canopy = any(!(Perennials %in% 1) & !(AnnualGrasses %in% 1) & !(AnnualForbs %in% 1) & !(Other %in% 0)),
+                                                         invalid.canopy = any(!(PerennialsCanopy %in% 1) & !(AnnualGrassesCanopy %in% 1) & !(AnnualForbsCanopy %in% 1) & !(OtherCanopy %in% 0)),
                                                          # Are the calculated gap sizes correct?
                                                          invalid.size = any(abs(GapStart - GapEnd) != Gap),
                                                          # Are all the start values larger than their end values, or vice versa?
