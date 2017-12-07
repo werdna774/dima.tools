@@ -1,3 +1,13 @@
+# Read in the default species list
+default.species <- function(){
+  return(read.csv(paste0(path.package("dima.tools"), "/defaults/species.csv"), stringsAsFactors = FALSE))
+}
+
+# Read in the default fieldnames
+fieldnames.lookup <- function(){
+  return(read.csv(paste0(path.package("dima.tools"), "/defaults/fieldnames.csv"), stringsAsFactors = FALSE))
+}
+
 #' Reading in data from multiple DIMAs
 #'
 #' @description This will read in data from one or more DIMAs according to the SQL queries requested and includes default SQL queries for canopy gap, line-point intercept, soil stability, and species inventory data. The output is either a list of lists of query results named with the source filename[s] or a list of query results combined from all sources named with the query name[s].
