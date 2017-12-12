@@ -229,6 +229,7 @@ check.richness <- function(detail.table,
                                                           # "FormDate" = as.Date(rep.int(unique(current.df$FormDate), times = length(invalid.species))),
                                                           "error" = invalid.species,
                                                           stringsAsFactors = FALSE)
+                                     output <- dplyr::mutate(error  = paste(error, "is not a valid unknown code or found in the USDA PLANTS database."))
                                      output$FormDate <- current.df$FormDate
                                    } else {
                                      output <- NULL
