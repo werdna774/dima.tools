@@ -62,6 +62,12 @@ check.plot <- function(site.table,
   errors$missing.soilstab$error <- "No soil stability form on record for the plot"
   errors$missing.soilstab <- dplyr::distinct(errors$missing.soilstab[!(sites.plots.lines$PlotKey %in% header.table.soilstability$PlotKey),])
 
+  # Which plot keys don't show up in any soil pit headers?
+  errors$missing.soilpit <- sites.plots.lines[, c("SiteID", "PlotID", "LineID")]
+  errors$missing.soilpit$LineID <- NA
+  errors$missing.soilpit$error <- "No soil pit form on record for the plot"
+  errors$missing.soilpit <- dplyr::distinct(errors$missing.soilpit[!(sites.plots.lines$PlotKey %in% header.table.soilpit$PlotKey),])
+
   # Now to flip it around!
   # Find only the line keys that show up in species richness headers, then find only the plot keys that don't have and line keys in that set
   errors$missing.richness <- sites.plots.lines[, c("SiteID", "PlotID", "LineID")]
