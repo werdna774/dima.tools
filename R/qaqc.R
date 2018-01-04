@@ -1,3 +1,14 @@
+#' Create a data frame reporting errors in DIMA plot forms
+#' @description Check the plot form tables for errors or incompleteness and return a data frame detailing the errors.
+#' @param site.table Data frame.  In DIMA, this is the table called tblSites. Must contain at least the variables \code{"SiteKey"} and \code{"SiteID"}.
+#' @param plot.table Data frame. In DIMA, this is the table called tblPlots.
+#' @param line.table Data frame. In DIMA, this is the table called tblLines. Must contain at least the variables \code{"PlotKey"}, \code{"LineKey"}, and \code{"LineID"}.
+#' @param header.table.lpi Data frame. In DIMA, this is the table called tblLPIHeader. Must contain at least the variables \code{"LineKey"} and \code{"RecKey"}.
+#' @param header.table.gap Data frame. In DIMA, this is the table called tblGapHeader. Must contain at least the variables \code{"LineKey"} and \code{"RecKey"}.
+#' @param header.table.richness Data frame. In DIMA, this is the table called tblSpecRichHeader. Must contain at least the variables \code{"LineKey"} and \code{"RecKey"}.
+#' @param header.table.soilstability Data frame. In DIMA, this is the table called tblSoilStabHeader. Must contain at least the variables \code{"LineKey"} and \code{"RecKey"}.
+#' @param header.table.soilpit Data frame. In DIMA, this is the table called tblSoilPits. Must contain at least the variables \code{"PlotKey"} and \code{"SoilKey"}.
+#' @param expected.linecount Numeric. The expected number of lines recorded on per plot. Defaults to \code{3}.
 #' @export
 check.plot <- function(site.table,
                        plot.table,
@@ -148,6 +159,8 @@ check.plot <- function(site.table,
   return(dplyr::distinct(output))
 }
 
+#' Check the minimum requirements of a header table
+#' @param header.table Data frame. The header table from DIMA, e.g. tblLPIHeader, tblGapHeader, etc.
 #' @export
 check.header <- function(header.table){
   # Is there a date?
