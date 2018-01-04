@@ -496,12 +496,16 @@ check.dima <- function(dima.tables = NULL,
     message("Using the provided DIMA tables")
   }
 
+  if (is.null(all.species)) {
+    all.species <- default.species()
+  }
+
   critical.tables <- c("tblSites", "tblPlots", "tblLines",
                        "tblLPIDetail", "tblLPIHeader",
                        "tblGapDetail", "tblGapHeader",
                        "tblSoilStabDetail", "tblSoilStabHeader",
                        "tblSpecRichDetail", "tblSpecRichHeader",
-                       "tblSoilPits")
+                       "tblSoilPits", "tblSoilPitHorizons")
 
   if (any(!(critical.tables %in% names(dima.tables)))){
     stop(paste("The following critical dataframes are missing from dima.tables:", paste(critical.tables[!(critical.tables %in% names(dima.tables))], collapse = ", ")))
