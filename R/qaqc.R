@@ -534,6 +534,214 @@ check.dima <- function(dima.tables = NULL,
   return(errors)
 }
 
+#' @export
+check.soilpit <- function(header.table, detail.table, sites.plots){
+  header.meta <- merge(x = sites.plots[,c("SiteKey", "SiteID", "PlotKey", "PlotID")],
+                       y = header.table)
+  detail.header.meta <- merge(x = header.meta[, c("SiteKey", "SiteID", "PlotKey", "PlotID", "SoilKey")],
+                              y = detail.table)
+  # Just make sure that things are ordered by HorizonKey for this next step to be guaranteed to work
+  detail.header.meta <- detail.header.meta[order(detail.header.meta$HorizonKey),]
+  # It'd be nice to have the horizons have numbers for human reference, so let's add those
+  # Create a vector of the frequencies of the soil keys, which is the same as the count of horizons
+  # Put it in the same order as it occurred in the data frame by slicing it with unique(soilkey)
+  # Then make a list of vectors 1:freq for each of those
+  # Then unlist to get a vector we can just stick into the data frame!
+  detail.header.meta[["Horizon"]] <- unlist(unname(lapply(X = table(detail.header.meta$SoilKey)[unique(detail.header.meta$SoilKey)],
+                                                          FUN = function(X){return(1:X)})))
+  # Metadata first
+  invalid.meta <- list()
+  metavariables <- c("SiteKey", "SiteID", "PlotKey", "PlotID", "SoilKey")
+  invalid.meta$observer <- create.errorframe(source.df = header.table,
+                                             source.variables = metavariables,
+                                             error.vector = is.na(header.table$Observer) | !is.character(header.table$Observer),
+                                             error.text = "Invalid or missing observer name(s)")
+  invalid.meta$pitdesc <- create.errorframe(source.df = header.table,
+                                            source.variables = metavariables,
+                                            error.vector = is.na(header.table$PitDesc) | !is.character(header.table$PitDesc),
+                                            error.text = "Invalid or missing pit description")
+  invalid.meta$pitdepth <- create.errorframe(source.df = header.table,
+                                             source.variables = metavariables,
+                                             error.vector = !(as.numeric(header.table$SoilDepthLower) > 0) | is.na(as.numeric(header.table$SoilDepthLower)),
+                                             error.text = "The pit has an invalid or missing depth. It must be > 0 cm/in")
+  invalid.meta$depthmeasure.pit <- create.errorframe(source.df = header.table,
+                                                     source.variables = metavariables,
+                                                     error.vector = !(header.table$DepthMeasure %in% c("cm", "in")),
+                                                     error.text = "The depth units must be either 'in' or 'cm'")
+  invalid.meta$coords <- create.errorframe(source.df = header.table,
+                                           source.variables = metavariables,
+                                           error.vector = (is.na(as.numeric(header.table$Latitude)) | is.na(as.numeric(header.table$Longitude))) | (as.numeric(header.table$Latitude) == 0 | as.numeric(header.table$Longitude) == 0),
+                                           error.text = "The pit has invalid or missing coordinates")
+  invalid.meta$elev <- create.errorframe(source.df = header.table,
+                                         source.variables = metavariables,
+                                         error.vector = is.na(as.numeric(header.table$Elevation)) | as.numeric(header.table$Elevation) == 0,
+                                         error.text = "The pit has an invalid or missing elevation")
+  invalid.meta$elevunits <- create.errorframe(source.df = header.table,
+                                              source.variables = metavariables,
+                                              error.vector = !(header.table$ElevationType %in% c("m", "ft")),
+                                              error.text = "The elevation units must be either 'm' or 'ft'")
+
+  header.detail <- merge(x = header.table[, c("SoilKey", "SoilDepthLower")],
+                         y = dplyr::summarize(.data = dplyr::group_by(.data = detail.table, SoilKey),
+                                              lowermost = max(c(max(HorizonDepthLower), max(HorizonDepthUpper)))))
+  invalidmeta$pitdepth.comparison <- create.errorframe(source.df = header.table,
+                                                       source.variables = metavariables,
+                                                       error.vector = header.table$SoilKey %in% header.detail$SoilKey[header.detail$SoilDepthLower != header.detail$lowermost],
+                                                       error.text = "The recorded pit depth is different from the deepest horizon depth.")
+
+  invalid.meta.df <- dplyr::bind_rows(invalid.meta)
+  if (nrow(invalid.meta.df) > 0) {
+    invalid.meta.df[["Horizon"]] <- NA
+    invalid.meta.df[["HorizonKey"]] <- NA
+    invalid.meta.df <- invalid.meta.df[, c(metavariables, c("HorizonKey", "Horizon"), "error")]
+  } else {
+    invalid.meta.df <- NULL
+  }
+
+  # Then details of the horizons
+  invalid.detail <- list()
+  detailvariables <- c("SiteKey", "SiteID", "PlotKey", "PlotID", "SoilKey", "HorizonKey", "Horizon")
+  invalid.detail$depthmeasure.horizon <- create.errorframe(source.df = detail.table,
+                                                           source.variables = detailvariables,
+                                                           error.vector = !(detail.table$DepthMeasure %in% c("cm", "in")),
+                                                           error.text = "The depth units must be either 'cm' or 'in'")
+  invalid.detail$depth <- create.errorframe(source.df = detail.table,
+                                            source.variables = detailvariables,
+                                            error.vector = any(!is.numeric(c(detail.table$HorizonDepthUpper, detail.table$HorizonDepthLower))),
+                                            error.text = "Either the upper or lower depth is not a numeric value")
+  invalid.detail$depthdirection <- create.errorframe(source.df = detail.table,
+                                                     source.variables = detailvariables,
+                                                     error.vector = detail.table$HorizonDepthUpper > detail.table$HorizonDepthLower | is.na(detail.table$HorizonDepthUpper > detail.table$HorizonDepthLower),
+                                                     error.text = "The lower horizon depth is above the upper horizon depth.")
+  invalid.detail$texture <- create.errorframe(source.df = detail.table,
+                                              source.variables = detailvariables,
+                                              error.vector = !(detail.table$Texture %in% c("COS", "S", "FS", "VFS", "LCOS",
+                                                   "LS", "LFS", "LVFS",
+                                                   "COSL", "SL", "FSL", "VFSL",
+                                                   "L", "SIL",
+                                                   "SI",
+                                                   "SCL", "CL", "SICL",
+                                                   "SC", "SIC", "C")),
+                                              error.text = "The horizon contains an invalid texture:",
+                                              error.component = "Texture")
+  invalid.detail$rockfrag <- create.errorframe(source.df = detail.table,
+                                               source.variables = detailvariables,
+                                               error.vector = !is.numeric(detail.table$RockFragments) | is.na(as.numeric(detail.table$RockFragments)) | as.numeric(detail.table$RockFragments) < 0 | as.numeric(detail.table$RockFragments) > 100,
+                                               error.text = "The rock fragment percentage is < 0%, > 100%, or not a numeric value")
+  invalid.detail$effervesence <- create.errorframe(source.df = detail.table,
+                                                   source.variables = detailvariables,
+                                                   error.vector = !(detail.table$Effer %in% c("NE", "VS", "SL", "ST", "VE")),
+                                                   error.text = "This effervesence code is invalid:",
+                                                   error.component = "Effer")
+  invalid.detail$horizon <- create.errorframe(source.df = detail.table,
+                                              source.variables = detailvariables,
+                                              error.vector = !(detail.table$ESD_Horizon %in% c("A", "AB", "AC", "AE", "A/B", "A/C", "A/E",
+                                                       "B", "BA", "BC", "BE", "B/A", "B/C" ,"B/E",
+                                                       "C", "CA", "CB", "C/A", "C/B",
+                                                       "E", "EA", "EB", "EC", "E/A", "E/B",
+                                                       "L", "M", "O", "R", "W",
+                                                       "")),
+                                              error.text = "This horizon type code is invalid:",
+                                              error.component = "ESD_Horizon")
+  invalid.detail$horizon.mod <- create.errorframe(source.df = detail.table,
+                                                  source.variables = detailvariables,
+                                                  error.vector = !(detail.table$ESD_HorizonModifier %in% c("d", "y", "gb", "t", "p", "bp", "gp", "g", "j", "jj", "n", "w", "wg", "ad", "hs", "h", "s", "k", "kb", "kg", "kk", "kny", "kqy", "m", "km", "kqm", "sm", "q", "tg", "tk", "tn", "ss", "tss", "tb", "tz", "v", "tv", "x", "tx", "tgx", "yy", "yz", "r", "i", "a", "e", "")),
+                                                  error.text = "This horizon modifier is invalid:",
+                                                  error.component = "ESD_HorizonModifier")
+  invalid.detail$hue <- create.errorframe(source.df = detail.table,
+                                          source.variables = detailvariables,
+                                          error.vector = !(detail.table$ESD_Hue %in% c("5R", "7.5R", "10R",
+                                               "2.5YR", "5YR", "7.5YR", "10YR",
+                                               "3.5Y", "5Y", "N", "10Y",
+                                               "5GY", "10GY",
+                                               "5G chr 1", "5G chr 2", "10G",
+                                               "5GB", "10GB",
+                                               "5B", "10B",
+                                               "5P")),
+                                          error.text = "This hue is invalid:",
+                                          error.component = "ESD_Hue")
+  invalid.detail$value <- create.errorframe(source.df = detail.table,
+                                            source.variables = detailvariables,
+                                            error.vector = !(as.numeric(detail.table$ESD_Value) %in% c(2, 2.5, 3, 4, 5, 6, 7, 8)),
+                                            error.text = "The value must be 2, 2.5, 3, 4, 5, 6, 7, or 8")
+  invalid.detail$chroma <- create.errorframe(source.df = detail.table,
+                                             source.variables = detailvariables,
+                                             error.vector = !(as.numeric(detail.table$ESD_Chroma) %in% c(0, 2, 3, 4, 6, 8)),
+                                             error.text = "The value must be 0, 2, 3, 4, 6, or 8")
+  invalid.detail$moist <- create.errorframe(source.df = detail.table,
+                                            source.variables = detailvariables,
+                                            error.vector = !(as.character(detail.table$ESD_Color) %in% c("Dry", "Wet")),
+                                            error.text = "The moisture of the soil at time of color determination must be 'dry' or 'wet'")
+  invalid.detail$grade <- create.errorframe(source.df = detail.table,
+                                            source.variables = detailvariables,
+                                            error.vector = !(detail.table$ESD_Grade %in% c(0, 1, 2, 3, NA)) & !(detail.table$ESD_Grade %in% c("0", "1", "2", "3", "", NA)),
+                                            error.text = "If provided, the grade must be 0, 2, 3, or 3")
+  invalid.detail$structure <- create.errorframe(source.df = detail.table,
+                                                source.variables = detailvariables,
+                                                error.vector = !(detail.table$ESD_Structure %in% c("GR", "ABK", "SBK","PL", "WEG", "PR", "COL", "SG", "MA", "CDY", "", NA)),
+                                                error.text = "This structure code is invalid:",
+                                                error.component = "ESD_Structure")
+  invalid.detail$size <- create.errorframe(source.df = detail.table,
+                                           source.variables = detailvariables,
+                                           error.vector = !(detail.table$ESD_Size %in% c("VF", "VN", "F", "TN", "M", "CO", "TK", "VC", "VK", "EC", "", NA)),
+                                           error.text = "This size code is invalid:",
+                                           error.component = "ESD_Size")
+
+  invalid.detail.df <- dplyr::bind_rows(invalid.detail)
+  if (!nrow(invalid.detail.df) > 0) {
+    invalid.detail.df <- NULL
+  }
+
+  output <- rbind(invalid.meta.df, invalid.detail.df)
+
+  return(output)
+
+}
+
+#' Create a data frame documenting errors
+#' @description This takes a source data frame with the relevant metadata and potentially a variable to flag as an error, adds a variable with the error message, and restricts the output to only the requested variables and the error message for the entries that had errors.
+#' @param source.df Data frame. The data frame containing the metadata entries, if relevant, the variable matching \code{error.component} to be used in creating a more specific error text string.
+#' @param source.variables Option vector of character strings. If \code{source.df} contains extraneous variables, this can be used to list the variables to keep from source.df. If \code{NULL} then all variables will be kept. Defaults to \code{NULL}.
+#' @param error.text Character string. The error message to add to the variable \code{error} in the output. This will be the same for all entries in the output data frame unless a variable is given in the argument \code{error.component} in which case the values from that variable will be added to the error text separated by " ".
+#' @param error.vector Logical vector. The logical vector used to slice \code{source.df} down to only entries in which an error occurred. \code{TRUE} values must correspond to an error occurring in \code{source.df}. The vector must be in the same order as \code{source.df} and the same length.
+#' @param error.component Optional character string matching a variable name in \code{source.df}. If provided, the values from this variable will be added to the end of the \code{error.text} string separated by a " ", allowing for more specific error text, e.g. "Invalid surface code: Rock" instead of just "Invalid surface code". Defaults to \code{NULL}.
+#' @output Data frame. Variables included are those in \code{source.df} (limited to whichever were listed in \code{source.variables} if appropriate) and \code{error} containing the error text. Only entries from \code{source.df} which correspond to \code{TRUE} values in \code{error.vector} are kept.
+create.errorframe <- function(source.df,
+                              source.variables = NULL,
+                              error.text,
+                              error.vector,
+                              error.component = NULL){
+  # Restrict the data frame to the desired variables
+  if (is.null(source.variables)){
+    source.variables <- names(source.df)
+  }
+  if (any(!(source.variables %in% names(source.df)))){
+    stop(paste0("The following variable names in source.variables were not found in the source.df: ", paste(source.varaibles[!(source.variables %in% names(source.df))], collapse = ", ")))
+  }
+  errorframe <- source.df[, source.variables]
+  # Add in this variable so we have it
+  errorframe[["error"]] <- NA
+  # Slice the data frame to only the places where there was an error
+  errorframe <- errorframe[error.vector,]
+
+  # If there were in fact any errors, add in the error text
+  if (any(error.vector)) {
+    # Get the vector of values to paste onto error.text (if appropriate)
+    if (!is.null(error.component)) {
+      if (!(error.component %in% names(source.df)) | length(error.component) > 1) {
+        stop("The variable name in error.component must match exactly one of the variables in source.df")
+      }
+      error.values <- source.df[[error.component]]
+    } else {
+      error.values <- error.component
+    }
+    # Add the error message to the data frame
+    errorframe$error <- trimws(paste(error.text, error.values))
+  }
+
+  return(errorframe)
+}
+
 # All the species in PLANTS
 # all.species <- read.csv("C:/Users/Nelson/Documents/Projects/dima.tools/inst/defaults/species.csv", stringsAsFactors = FALSE)
 #
