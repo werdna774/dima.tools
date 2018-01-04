@@ -549,6 +549,10 @@ check.dima <- function(dima.tables = NULL,
                           header.table = dima.tables$tblGapHeader,
                           sites.plots.lines.meta = sites.plots.lines.meta)
 
+  errors[["soilpit"]] <- check.soilpit(header.table = dima.tables$tblSoilPits,
+                                       detail.table = dima.tables$tblSoilPitHorizons,
+                                       sites.plots = sites.plots.lines[,c("SiteKey", "SiteID", "PlotKey", "PlotID")])
+
   if (write) {
     if (is.null(dima.filepath)) {
       message("The results will not be written due to a lack of a valid filepath.")
