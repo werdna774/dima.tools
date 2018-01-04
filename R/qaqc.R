@@ -1,13 +1,13 @@
 #' Create a data frame reporting errors in DIMA plot forms
 #' @description Check the plot form tables for errors or incompleteness and return a data frame detailing the errors.
-#' @param site.table Data frame.  In DIMA, this is the table called tblSites. Must contain at least the variables \code{"SiteKey"} and \code{"SiteID"}.
-#' @param plot.table Data frame. In DIMA, this is the table called tblPlots.
-#' @param line.table Data frame. In DIMA, this is the table called tblLines. Must contain at least the variables \code{"PlotKey"}, \code{"LineKey"}, and \code{"LineID"}.
-#' @param header.table.lpi Data frame. In DIMA, this is the table called tblLPIHeader. Must contain at least the variables \code{"LineKey"} and \code{"RecKey"}.
-#' @param header.table.gap Data frame. In DIMA, this is the table called tblGapHeader. Must contain at least the variables \code{"LineKey"} and \code{"RecKey"}.
-#' @param header.table.richness Data frame. In DIMA, this is the table called tblSpecRichHeader. Must contain at least the variables \code{"LineKey"} and \code{"RecKey"}.
-#' @param header.table.soilstability Data frame. In DIMA, this is the table called tblSoilStabHeader. Must contain at least the variables \code{"LineKey"} and \code{"RecKey"}.
-#' @param header.table.soilpit Data frame. In DIMA, this is the table called tblSoilPits. Must contain at least the variables \code{"PlotKey"} and \code{"SoilKey"}.
+#' @param site.table Data frame. In DIMA and the output from \code{read.dima()}, this is the table called tblSites. Must contain at least the variables \code{"SiteKey"} and \code{"SiteID"}.
+#' @param plot.table Data frame. In DIMA and the output from \code{read.dima()}, this is the table called tblPlots.
+#' @param line.table Data frame. In DIMA and the output from \code{read.dima()}, this is the table called tblLines. Must contain at least the variables \code{"PlotKey"}, \code{"LineKey"}, and \code{"LineID"}.
+#' @param header.table.lpi Data frame. In DIMA and the output from \code{read.dima()}, this is the table called tblLPIHeader. Must contain at least the variables \code{"LineKey"} and \code{"RecKey"}.
+#' @param header.table.gap Data frame. In DIMA and the output from \code{read.dima()}, this is the table called tblGapHeader. Must contain at least the variables \code{"LineKey"} and \code{"RecKey"}.
+#' @param header.table.richness Data frame. In DIMA and the output from \code{read.dima()}, this is the table called tblSpecRichHeader. Must contain at least the variables \code{"LineKey"} and \code{"RecKey"}.
+#' @param header.table.soilstability Data frame. In DIMA and the output from \code{read.dima()}, this is the table called tblSoilStabHeader. Must contain at least the variables \code{"LineKey"} and \code{"RecKey"}.
+#' @param header.table.soilpit Data frame. In DIMA and the output from \code{read.dima()}, this is the table called tblSoilPits. Must contain at least the variables \code{"PlotKey"} and \code{"SoilKey"}.
 #' @param expected.linecount Numeric. The expected number of lines recorded on per plot. Defaults to \code{3}.
 #' @export
 check.plot <- function(site.table,
@@ -166,7 +166,7 @@ check.plot <- function(site.table,
 }
 
 #' Check the minimum requirements of a header table
-#' @param header.table Data frame. The header table from DIMA, e.g. tblLPIHeader, tblGapHeader, etc.
+#' @param header.table Data frame. A header table from DIMA, e.g. tblLPIHeader, tblGapHeader, etc.
 #' @export
 check.header <- function(header.table){
   # Is there a date?
@@ -220,6 +220,11 @@ check.header <- function(header.table){
   return(output)
 }
 
+#' Create a data frame documenting errors in species richness forms
+#' @param detail.table Data frame. In DIMA and the output from \code{read.dima()}, this is the table called tblSpecRichDetail.
+#' @param header.table Data frame. In DIMA and the output from \code{read.dima()}, this is the table called tblSpecRichHeader.
+#' @param sites.plots.lines Data frame. The result of merging the DIMA tables tblSites and tblPlots by the variable SiteKey and that result with the DIMA table tblLines by LineKey.
+#' @param all.species Data frame. The full list of species found in the USDA PLANTS database. Must contain the species symbol in the variable "Symbol". Defaults to the result of \code{default.species()}.
 #' @export
 check.richness <- function(detail.table,
                            header.table,
@@ -279,11 +284,19 @@ check.richness <- function(detail.table,
   return(output)
 }
 
+#' Create a data frame documenting errors in line-point intercept forms
+#' @param detail.table Data frame. In DIMA and the output from \code{read.dima()}, this is the table called tblLPIDetail.
+#' @param header.table Data frame. In DIMA and the output from \code{read.dima()}, this is the table called tblLPIHeader.
+#' @param sites.plots.lines Data frame. The result of merging the DIMA tables tblSites and tblPlots by the variable SiteKey and that result with the DIMA table tblLines by LineKey.
+#' @param all.species Data frame. The full list of species found in the USDA PLANTS database. Must contain the species symbol in the variable "Symbol". Defaults to the result of \code{default.species()}.
 #' @export
 check.lpi <- function(detail.table,
                       header.table,
                       sites.plots.lines,
-                      all.species) {
+                      all.species = NULL) {
+  if (is.null(all.species)) {
+    all.species <- default.species()
+  }
   # We'll create vectors to flag where bad species occur. This is so we can loop over however many canopy columns there are and combine the results
   valid.lowercanopy.unknowns <- rep.int(FALSE, times = nrow(detail.table))
   valid.lowercanopy.species <- rep.int(FALSE, times = nrow(detail.table))
@@ -345,6 +358,10 @@ check.lpi <- function(detail.table,
 ## MAKE SURE THAT LPI SPECIES SHOW UP IN THE CORRESPONDING RICHNESS! ##
 ######## ######## ######## ######## ######## ######## ######## ########
 
+#' Create a data frame documenting errors in gap forms
+#' @param detail.table Data frame. In DIMA and the output from \code{read.dima()}, this is the table called tblGapDetail.
+#' @param header.table Data frame. In DIMA and the output from \code{read.dima()}, this is the table called tblGapHeader.
+#' @param sites.plots.lines.meta Data frame. The result of merging the DIMA tables tblSites and tblPlots by the variable SiteKey and that result with the DIMA table tblLines by LineKey.
 #' @export
 check.gap <- function(detail.table,
                       header.table,
@@ -447,11 +464,19 @@ check.gap <- function(detail.table,
 
 }
 
+#' Create a list of data frames documenting errors in plot, LPI, gap, species richness, soil stability, and soil pit forms.
+#' @param dima.tables List of data frames. Optional only if instead providing values for \code{dima.filepath} and \code{dima.filename}. The result of importing one or more DIMA with \code{read.dima()}. Must contain the data frames tblSites, tblPlots, tblLines, tblLPIDetail, tblLPIHeader, tblGapDetail, tblGapHeader, tblSoilStabDetail, tblSoilStabHeader, tblSpecRichDetail, tblSpecRichHeader, tblSoilPits, and tblSoilPitHorizons. Defaults to \code{NULL}.
+#' @param dima.filepath Character string. Optional only if instead providing a list of data frames as \code{dima.tables}. If provided, must match the full filepath to the folder containing the DIMA or DIMAs to read in. Defaults to \code{NULL}.
+#' @param dima.filename Character string. Optional only if instead providing a list of data frames as \code{dima.tables}. If provided, must match the full filename or filenames of the DIMA or DIMAs to read in from the folder specified in \code{dima.filepath}. Defaults to \code{NULL}.
+#' @param all.species Data frame. The full list of species found in the USDA PLANTS database. Must contain the species symbol in the variable "Symbol". Defaults to the result of \code{default.species()}.
+#' @param expected.linecount Numeric. The expected number of lines recorded on per plot. Defaults to \code{3}.
+#' @param write Logical. If \code{TRUE} and \code{dima.filepath} is not \code{NULL} then the error data frames will be written as CSV files into that filepath. Defaults to \code{TRUE}.
+#' @output A list of data frames of errors, one data frame per form type checked.
 #' @export
 check.dima <- function(dima.tables = NULL,
                        dima.filepath = NULL,
                        dima.filename = NULL,
-                       all.species,
+                       all.species = NULL,
                        expected.linecount = 3,
                        write = TRUE){
 
@@ -534,8 +559,14 @@ check.dima <- function(dima.tables = NULL,
   return(errors)
 }
 
+#' Create a data frame documenting errors in soil pit forms
+#' @param header.table Data frame. In DIMA and the output from \code{read.dima()}, this is the table called tblSoilPit.
+#' @param detail.table Data frame. In DIMA and the output from \code{read.dima()}, this is the table called tblSoilPitHorizons.
+#' @param sites.plots. Data frame. The result of merging the DIMA tables tblSites and tblPlots by SiteKey.
 #' @export
-check.soilpit <- function(header.table, detail.table, sites.plots){
+check.soilpit <- function(header.table,
+                          detail.table,
+                          sites.plots){
   header.meta <- merge(x = sites.plots[,c("SiteKey", "SiteID", "PlotKey", "PlotID")],
                        y = header.table)
   detail.header.meta <- merge(x = header.meta[, c("SiteKey", "SiteID", "PlotKey", "PlotID", "SoilKey")],
@@ -705,7 +736,7 @@ check.soilpit <- function(header.table, detail.table, sites.plots){
 #' @param error.text Character string. The error message to add to the variable \code{error} in the output. This will be the same for all entries in the output data frame unless a variable is given in the argument \code{error.component} in which case the values from that variable will be added to the error text separated by " ".
 #' @param error.vector Logical vector. The logical vector used to slice \code{source.df} down to only entries in which an error occurred. \code{TRUE} values must correspond to an error occurring in \code{source.df}. The vector must be in the same order as \code{source.df} and the same length.
 #' @param error.component Optional character string matching a variable name in \code{source.df}. If provided, the values from this variable will be added to the end of the \code{error.text} string separated by a " ", allowing for more specific error text, e.g. "Invalid surface code: Rock" instead of just "Invalid surface code". Defaults to \code{NULL}.
-#' @output Data frame. Variables included are those in \code{source.df} (limited to whichever were listed in \code{source.variables} if appropriate) and \code{error} containing the error text. Only entries from \code{source.df} which correspond to \code{TRUE} values in \code{error.vector} are kept.
+#' @output Data frame. Variables included are those in \code{source.df} limited to whichever were listed in \code{source.variables} if appropriate and \code{error} containing the error text. Only entries from \code{source.df} which correspond to \code{TRUE} values in \code{error.vector} are kept.
 create.errorframe <- function(source.df,
                               source.variables = NULL,
                               error.text,
