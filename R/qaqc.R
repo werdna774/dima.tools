@@ -471,7 +471,6 @@ check.gap <- function(detail.table,
 #' @param all.species Data frame. The full list of species found in the USDA PLANTS database. Must contain the species symbol in the variable "Symbol". Defaults to the result of \code{default.species()}.
 #' @param expected.linecount Numeric. The expected number of lines recorded on per plot. Defaults to \code{3}.
 #' @param write Logical. If \code{TRUE} and \code{dima.filepath} is not \code{NULL} then the error data frames will be written as CSV files into that filepath. Defaults to \code{TRUE}.
-#' @output A list of data frames of errors, one data frame per form type checked.
 #' @export
 check.dima <- function(dima.tables = NULL,
                        dima.filepath = NULL,
@@ -740,7 +739,7 @@ check.soilpit <- function(header.table,
 #' @param error.text Character string. The error message to add to the variable \code{error} in the output. This will be the same for all entries in the output data frame unless a variable is given in the argument \code{error.component} in which case the values from that variable will be added to the error text separated by " ".
 #' @param error.vector Logical vector. The logical vector used to slice \code{source.df} down to only entries in which an error occurred. \code{TRUE} values must correspond to an error occurring in \code{source.df}. The vector must be in the same order as \code{source.df} and the same length.
 #' @param error.component Optional character string matching a variable name in \code{source.df}. If provided, the values from this variable will be added to the end of the \code{error.text} string separated by a " ", allowing for more specific error text, e.g. "Invalid surface code: Rock" instead of just "Invalid surface code". Defaults to \code{NULL}.
-#' @output Data frame. Variables included are those in \code{source.df} limited to whichever were listed in \code{source.variables} if appropriate and \code{error} containing the error text. Only entries from \code{source.df} which correspond to \code{TRUE} values in \code{error.vector} are kept.
+#' @export
 create.errorframe <- function(source.df,
                               source.variables = NULL,
                               error.text,
