@@ -760,7 +760,7 @@ create.errorframe <- function(source.df,
     source.variables <- names(source.df)
   }
   if (any(!(source.variables %in% names(source.df)))){
-    stop(paste0("The following variable names in source.variables were not found in the source.df: ", paste(source.varaibles[!(source.variables %in% names(source.df))], collapse = ", ")))
+    stop(paste0("The following variable names in source.variables were not found in the source.df: ", paste(source.variables[!(source.variables %in% names(source.df))], collapse = ", ")))
   }
   errorframe <- source.df[, source.variables]
   # Add in this variable so we have it
