@@ -246,6 +246,7 @@ check.richness <- function(detail.table,
                                    # Slice that vector to only codes that aren't valid unknowns or in all.species
                                    invalid.species <- species[!(species %in% all.species$Symbol) & !grepl(species, pattern = "^(AF|AG|PF|PG|SH|TR)[0-9]{2,3}$")]
                                    if (length(invalid.species) > 0) {
+                                     message("ERRORS FOUND")
                                      # Assemble the output data frame
                                      output <- data.frame("SiteID" = rep.int(unique(current.df$SiteID), times = length(invalid.species)),
                                                           "PlotID" = rep.int(unique(current.df$PlotID), times = length(invalid.species)),
@@ -253,13 +254,16 @@ check.richness <- function(detail.table,
                                                           # "FormDate" = as.Date(rep.int(unique(current.df$FormDate), times = length(invalid.species))),
                                                           "error" = invalid.species,
                                                           stringsAsFactors = FALSE)
-                                     output <- dplyr::mutate(error  = paste(error, "is not a valid unknown code or found in the USDA PLANTS database."))
+                                     output <- dplyr::mutate(.data = output,
+                                                             error  = paste(error, "is not a valid unknown code or found in the USDA PLANTS database."))
                                      output$FormDate <- current.df$FormDate
+                                     output[, c("SiteID", "PlotID", "LineID", "FormDate", "error")]
                                    } else {
+                                     message("No errors!")
                                      output <- NULL
                                    }
 
-                                   return(output[, c("SiteID", "PlotID", "LineID", "FormDate", "error")])
+                                   return(output)
                                  },
                                  all.species = all.species)
 
