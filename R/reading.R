@@ -332,6 +332,11 @@ extract.table <- function(data.path, dima, query){
     stop("Unable to find the specified DIMA in the provided data path")
   }
 
+  ## Using odbc
+  # dima.connection <- odbc::dbConnect(drv = "Microsoft Access Driver", dsn = paste(data.path, dima, sep = "/"))
+  # data.current <- lapply(query, FUN = DBI::dbGetQuery, conn = dima.connection)
+  # odbc::dbDisconnect(dima.connection)
+
   ## Use the appropriate function from RODBC:: based on 32- versus 64-bit installs of R
   switch(R.Version()$arch,
          "x86_64" = {
