@@ -529,30 +529,30 @@ check.dima <- function(dima.tables = NULL,
 
   message("Checking plots")
   errors[["plots"]] <- check.plot(site.table = dima.tables$tblSites,
-                             plot.table = dima.tables$tblPlots,
-                             line.table = dima.tables$tblLines,
-                             header.table.lpi = dima.tables$tblLPIHeader,
-                             header.table.gap = dima.tables$tblGapHeader,
-                             header.table.richness = dima.tables$tblSpecRichHeader,
-                             header.table.soilstability = dima.tables$tblSoilStabHeader,
-                             header.table.soilpit = dima.tables$tblSoilPits)
+                                  plot.table = dima.tables$tblPlots,
+                                  line.table = dima.tables$tblLines,
+                                  header.table.lpi = dima.tables$tblLPIHeader,
+                                  header.table.gap = dima.tables$tblGapHeader,
+                                  header.table.richness = dima.tables$tblSpecRichHeader,
+                                  header.table.soilstability = dima.tables$tblSoilStabHeader,
+                                  header.table.soilpit = dima.tables$tblSoilPits)
 
   message("Checking richness")
   errors[["richness"]] <- check.richness(detail.table = dima.tables$tblSpecRichDetail,
-                                    header.table = dima.tables$tblSpecRichHeader,
-                                    all.species = all.species,
-                                    sites.plots.lines = sites.plots.lines)
+                                         header.table = dima.tables$tblSpecRichHeader,
+                                         all.species = all.species,
+                                         sites.plots.lines = sites.plots.lines)
 
   message("Checking LPI")
   errors[["lpi"]] <- check.lpi(detail.table = dima.tables$tblLPIDetail,
-                          header.table = dima.tables$tblLPIHeader,
-                          all.species = all.species,
-                          sites.plots.lines = sites.plots.lines)
+                               header.table = dima.tables$tblLPIHeader,
+                               all.species = all.species,
+                               sites.plots.lines = sites.plots.lines)
 
   message("Checking gap")
   errors[["gap"]] <- check.gap(detail.table = dima.tables$tblGapDetail,
-                          header.table = dima.tables$tblGapHeader,
-                          sites.plots.lines.meta = sites.plots.lines.meta)
+                               header.table = dima.tables$tblGapHeader,
+                               sites.plots.lines.meta = sites.plots.lines.meta)
 
   message("Checking soil pits")
   errors[["soilpit"]] <- check.soilpit(header.table = dima.tables$tblSoilPits,
@@ -629,9 +629,9 @@ check.soilpit <- function(header.table,
                          y = dplyr::summarize(.data = dplyr::group_by(.data = detail.table, SoilKey),
                                               lowermost = max(c(max(HorizonDepthLower), max(HorizonDepthUpper)))))
   invalid.meta$pitdepth.comparison <- create.errorframe(source.df = header.meta,
-                                                       source.variables = metavariables,
-                                                       error.vector = header.table$SoilKey %in% header.detail$SoilKey[header.detail$SoilDepthLower != header.detail$lowermost],
-                                                       error.text = "The recorded pit depth is different from the deepest horizon depth.")
+                                                        source.variables = metavariables,
+                                                        error.vector = header.table$SoilKey %in% header.detail$SoilKey[header.detail$SoilDepthLower != header.detail$lowermost],
+                                                        error.text = "The recorded pit depth is different from the deepest horizon depth.")
 
   invalid.meta.df <- dplyr::bind_rows(invalid.meta)
   if (nrow(invalid.meta.df) > 0) {
@@ -660,12 +660,12 @@ check.soilpit <- function(header.table,
   invalid.detail$texture <- create.errorframe(source.df = detail.header.meta,
                                               source.variables = detailvariables,
                                               error.vector = !(detail.header.meta$Texture %in% c("COS", "S", "FS", "VFS", "LCOS",
-                                                   "LS", "LFS", "LVFS",
-                                                   "COSL", "SL", "FSL", "VFSL",
-                                                   "L", "SIL",
-                                                   "SI",
-                                                   "SCL", "CL", "SICL",
-                                                   "SC", "SIC", "C")),
+                                                                                                 "LS", "LFS", "LVFS",
+                                                                                                 "COSL", "SL", "FSL", "VFSL",
+                                                                                                 "L", "SIL",
+                                                                                                 "SI",
+                                                                                                 "SCL", "CL", "SICL",
+                                                                                                 "SC", "SIC", "C")),
                                               error.text = "The horizon contains an invalid texture:",
                                               error.component = "Texture")
   invalid.detail$rockfrag <- create.errorframe(source.df = detail.header.meta,
@@ -680,11 +680,11 @@ check.soilpit <- function(header.table,
   invalid.detail$horizon <- create.errorframe(source.df = detail.header.meta,
                                               source.variables = detailvariables,
                                               error.vector = !(detail.header.meta$ESD_Horizon %in% c("A", "AB", "AC", "AE", "A/B", "A/C", "A/E",
-                                                       "B", "BA", "BC", "BE", "B/A", "B/C" ,"B/E",
-                                                       "C", "CA", "CB", "C/A", "C/B",
-                                                       "E", "EA", "EB", "EC", "E/A", "E/B",
-                                                       "L", "M", "O", "R", "W",
-                                                       "")),
+                                                                                                     "B", "BA", "BC", "BE", "B/A", "B/C" ,"B/E",
+                                                                                                     "C", "CA", "CB", "C/A", "C/B",
+                                                                                                     "E", "EA", "EB", "EC", "E/A", "E/B",
+                                                                                                     "L", "M", "O", "R", "W",
+                                                                                                     "")),
                                               error.text = "This horizon type code is invalid:",
                                               error.component = "ESD_Horizon")
   invalid.detail$horizon.mod <- create.errorframe(source.df = detail.header.meta,
@@ -695,13 +695,13 @@ check.soilpit <- function(header.table,
   invalid.detail$hue <- create.errorframe(source.df = detail.header.meta,
                                           source.variables = detailvariables,
                                           error.vector = !(detail.header.meta$ESD_Hue %in% c("5R", "7.5R", "10R",
-                                               "2.5YR", "5YR", "7.5YR", "10YR",
-                                               "2.5Y", "5Y", "N", "10Y",
-                                               "5GY", "10GY",
-                                               "5G chr 1", "5G chr 2", "10G",
-                                               "5GB", "10GB",
-                                               "5B", "10B",
-                                               "5P")),
+                                                                                             "2.5YR", "5YR", "7.5YR", "10YR",
+                                                                                             "2.5Y", "5Y", "N", "10Y",
+                                                                                             "5GY", "10GY",
+                                                                                             "5G chr 1", "5G chr 2", "10G",
+                                                                                             "5GB", "10GB",
+                                                                                             "5B", "10B",
+                                                                                             "5P")),
                                           error.text = "This hue is invalid:",
                                           error.component = "ESD_Hue")
   invalid.detail$value <- create.errorframe(source.df = detail.header.meta,
