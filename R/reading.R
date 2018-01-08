@@ -1,4 +1,5 @@
 # Read in the default species list
+#' @export
 default.species <- function(){
   return(read.csv(paste0(path.package("dima.tools"), "/defaults/species.csv"), stringsAsFactors = FALSE))
 }
