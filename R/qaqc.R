@@ -569,7 +569,7 @@ check.dima <- function(dima.tables = NULL,
 #' Create a data frame documenting errors in soil pit forms
 #' @param header.table Data frame. In DIMA and the output from \code{read.dima()}, this is the table called tblSoilPit.
 #' @param detail.table Data frame. In DIMA and the output from \code{read.dima()}, this is the table called tblSoilPitHorizons.
-#' @param sites.plots. Data frame. The result of merging the DIMA tables tblSites and tblPlots by SiteKey.
+#' @param sites.plots Data frame. The result of merging the DIMA tables tblSites and tblPlots by SiteKey.
 #' @export
 check.soilpit <- function(header.table,
                           detail.table,
