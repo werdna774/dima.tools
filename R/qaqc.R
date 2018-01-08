@@ -321,18 +321,20 @@ check.lpi <- function(detail.table,
   }
   # Vectors to check the first hit and surface hit
   valid.topcanopy <- grepl(detail.table$TopCanopy, pattern = "^(AF|AG|PF|PG|SH|TR)[0-9]{2,3}$") | detail.table$TopCanopy %in% all.species$Symbol | detail.table$TopCanopy %in% c("None")
-  valid.surface <- !grepl(detail.table$SoilSurface, pattern = "^(AF|AG|PF|PG|SH|TR)[0-9]{2,3}$") & !(detail.table$SoilSurface %in% all.species$Symbol) & !(detail.table$SoilSurface %in% surface.codes)
+  valid.surface <- grepl(detail.table$SoilSurface, pattern = "^(AF|AG|PF|PG|SH|TR)[0-9]{2,3}$") | detail.table$SoilSurface %in% all.species$Symbol | detail.table$SoilSurface %in% surface.codes
 
   # Get the entries where something was wrong and add an appropriate error. Slicing after adding the error means never worrying about empty data frames
-  invalid.top <- detail.table[, c("RecKey", "PointLoc")]
-  invalid.top$error <- "Invalid value in the top canopy slot"
-  invalid.top <- invalid.top[!valid.topcanopy,]
-  invalid.lower <- detail.table[, c("RecKey", "PointLoc")]
+  invalid.top <- detail.table[!valid.topcanopy, c("RecKey", "PointLoc", "TopCanopy")]
+  invalid.top$error <- paste("Invalid value in the top canopy slot:", invalid.top$TopCanopy)
+  invalid.top <- invalid.top[, c("RecKey", "PointLoc", "error")]
+
+  invalid.lower <- detail.table[!valid.lowercanopy.code & !valid.lowercanopy.species & !valid.lowercanopy.unknowns, c("RecKey", "PointLoc", lower.variables)]
   invalid.lower$error <- "Invalid value in a lower canopy slot"
-  invalid.lower <- invalid.lower[!valid.lowercanopy.code & !valid.lowercanopy.species & !valid.lowercanopy.unknowns,]
-  invalid.surface <- detail.table[, c("RecKey", "PointLoc")]
-  invalid.surface$error <- "Invalid value in the surface slot"
-  invalid.surface <- invalid.surface[!valid.surface,]
+  invalid.lower <- invalid.lower[, c("RecKey", "PointLoc", "error")]
+
+  invalid.surface <- detail.table[!valid.surface, c("RecKey", "PointLoc", "SoilSurface")]
+  invalid.surface$error <- paste("Invalid value in the surface slot:", invalid.surface$SoilSurface)
+  invalid.surface <- invalid.surface[,c("RecKey", "PointLoc", "error")]
 
   # Combine all the errors
   invalid.lpi <- rbind(invalid.top, invalid.lower, invalid.surface)
