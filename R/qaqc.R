@@ -591,36 +591,36 @@ check.soilpit <- function(header.table,
   # Put it in the same order as it occurred in the data frame by slicing it with unique(soilkey)
   # Then make a list of vectors 1:freq for each of those
   # Then unlist to get a vector we can just stick into the data frame!
-  detail.header.meta[["Horizon"]] <- unlist(unname(lapply(X = table(detail.header.meta$SoilKey)[unique(detail.header.meta$SoilKey)],
+  detail.header.meta[["Horizon"]] <- unlist(unname(lapply(X = table(detail.header.meta$SoilKey)[as.character(unique(detail.header.meta$SoilKey))],
                                                           FUN = function(X){return(1:X)})))
   # Metadata first
   invalid.meta <- list()
   metavariables <- c("SiteKey", "SiteID", "PlotKey", "PlotID", "SoilKey")
-  invalid.meta$observer <- create.errorframe(source.df = header.table,
+  invalid.meta$observer <- create.errorframe(source.df = header.meta,
                                              source.variables = metavariables,
                                              error.vector = is.na(header.table$Observer) | !is.character(header.table$Observer),
                                              error.text = "Invalid or missing observer name(s)")
-  invalid.meta$pitdesc <- create.errorframe(source.df = header.table,
+  invalid.meta$pitdesc <- create.errorframe(source.df = header.meta,
                                             source.variables = metavariables,
                                             error.vector = is.na(header.table$PitDesc) | !is.character(header.table$PitDesc),
                                             error.text = "Invalid or missing pit description")
-  invalid.meta$pitdepth <- create.errorframe(source.df = header.table,
+  invalid.meta$pitdepth <- create.errorframe(source.df = header.meta,
                                              source.variables = metavariables,
                                              error.vector = !(as.numeric(header.table$SoilDepthLower) > 0) | is.na(as.numeric(header.table$SoilDepthLower)),
                                              error.text = "The pit has an invalid or missing depth. It must be > 0 cm/in")
-  invalid.meta$depthmeasure.pit <- create.errorframe(source.df = header.table,
+  invalid.meta$depthmeasure.pit <- create.errorframe(source.df = header.meta,
                                                      source.variables = metavariables,
                                                      error.vector = !(header.table$DepthMeasure %in% c("cm", "in")),
                                                      error.text = "The depth units must be either 'in' or 'cm'")
-  invalid.meta$coords <- create.errorframe(source.df = header.table,
+  invalid.meta$coords <- create.errorframe(source.df = header.meta,
                                            source.variables = metavariables,
                                            error.vector = (is.na(as.numeric(header.table$Latitude)) | is.na(as.numeric(header.table$Longitude))) | (as.numeric(header.table$Latitude) == 0 | as.numeric(header.table$Longitude) == 0),
                                            error.text = "The pit has invalid or missing coordinates")
-  invalid.meta$elev <- create.errorframe(source.df = header.table,
+  invalid.meta$elev <- create.errorframe(source.df = header.meta,
                                          source.variables = metavariables,
                                          error.vector = is.na(as.numeric(header.table$Elevation)) | as.numeric(header.table$Elevation) == 0,
                                          error.text = "The pit has an invalid or missing elevation")
-  invalid.meta$elevunits <- create.errorframe(source.df = header.table,
+  invalid.meta$elevunits <- create.errorframe(source.df = header.meta,
                                               source.variables = metavariables,
                                               error.vector = !(header.table$ElevationType %in% c("m", "ft")),
                                               error.text = "The elevation units must be either 'm' or 'ft'")
@@ -628,7 +628,7 @@ check.soilpit <- function(header.table,
   header.detail <- merge(x = header.table[, c("SoilKey", "SoilDepthLower")],
                          y = dplyr::summarize(.data = dplyr::group_by(.data = detail.table, SoilKey),
                                               lowermost = max(c(max(HorizonDepthLower), max(HorizonDepthUpper)))))
-  invalid.meta$pitdepth.comparison <- create.errorframe(source.df = header.table,
+  invalid.meta$pitdepth.comparison <- create.errorframe(source.df = header.meta,
                                                        source.variables = metavariables,
                                                        error.vector = header.table$SoilKey %in% header.detail$SoilKey[header.detail$SoilDepthLower != header.detail$lowermost],
                                                        error.text = "The recorded pit depth is different from the deepest horizon depth.")
