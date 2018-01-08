@@ -306,7 +306,7 @@ check.lpi <- function(detail.table,
   valid.lowercanopy.species <- rep.int(FALSE, times = nrow(detail.table))
   valid.lowercanopy.code <- rep.int(FALSE, times = nrow(detail.table))
   # We don't know how old the DIMA will be, so it's not clear how many lower codes there'll be to evaluate
-  lower.variables <- names(dima.tables$tblLPIDetail)[grepl(names(dima.tables$tblLPIDetail), pattern = "^Lower")]
+  lower.variables <- names(detail.table)[grepl(names(detail.table), pattern = "^Lower")]
   # Here are the codes for surface and lower canopy
   surface.codes <- c("S", "R", "W", "D", "LC", "M", "CY", "EL", "GR", "CB", "ST", "BY", "BR")
   lower.canopy.codes <- c("L", "HL", "WL", "NL", "DS", "VL", "GR", "CB", "ST")
