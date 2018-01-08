@@ -628,7 +628,7 @@ check.soilpit <- function(header.table,
   header.detail <- merge(x = header.table[, c("SoilKey", "SoilDepthLower")],
                          y = dplyr::summarize(.data = dplyr::group_by(.data = detail.table, SoilKey),
                                               lowermost = max(c(max(HorizonDepthLower), max(HorizonDepthUpper)))))
-  invalidmeta$pitdepth.comparison <- create.errorframe(source.df = header.table,
+  invalid.meta$pitdepth.comparison <- create.errorframe(source.df = header.table,
                                                        source.variables = metavariables,
                                                        error.vector = header.table$SoilKey %in% header.detail$SoilKey[header.detail$SoilDepthLower != header.detail$lowermost],
                                                        error.text = "The recorded pit depth is different from the deepest horizon depth.")
