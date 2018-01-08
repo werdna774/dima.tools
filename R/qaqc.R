@@ -527,6 +527,7 @@ check.dima <- function(dima.tables = NULL,
 
   errors <- list()
 
+  message("Checking plots")
   errors[["plots"]] <- check.plot(site.table = dima.tables$tblSites,
                              plot.table = dima.tables$tblPlots,
                              line.table = dima.tables$tblLines,
@@ -536,23 +537,24 @@ check.dima <- function(dima.tables = NULL,
                              header.table.soilstability = dima.tables$tblSoilStabHeader,
                              header.table.soilpit = dima.tables$tblSoilPits)
 
-
+  message("Checking richness")
   errors[["richness"]] <- check.richness(detail.table = dima.tables$tblSpecRichDetail,
                                     header.table = dima.tables$tblSpecRichHeader,
                                     all.species = all.species,
                                     sites.plots.lines = sites.plots.lines)
 
-
+  message("Checking LPI")
   errors[["lpi"]] <- check.lpi(detail.table = dima.tables$tblLPIDetail,
                           header.table = dima.tables$tblLPIHeader,
                           all.species = all.species,
                           sites.plots.lines = sites.plots.lines)
 
-
+  message("Checking gap")
   errors[["gap"]] <- check.gap(detail.table = dima.tables$tblGapDetail,
                           header.table = dima.tables$tblGapHeader,
                           sites.plots.lines.meta = sites.plots.lines.meta)
 
+  message("Checking soil pits")
   errors[["soilpit"]] <- check.soilpit(header.table = dima.tables$tblSoilPits,
                                        detail.table = dima.tables$tblSoilPitHorizons,
                                        sites.plots = sites.plots.lines[,c("SiteKey", "SiteID", "PlotKey", "PlotID")])
