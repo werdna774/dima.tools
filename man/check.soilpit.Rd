@@ -11,7 +11,7 @@ check.soilpit(header.table, detail.table, sites.plots)
 
 \item{detail.table}{Data frame. In DIMA and the output from \code{read.dima()}, this is the table called tblSoilPitHorizons.}
 
-\item{sites.plots.}{Data frame. The result of merging the DIMA tables tblSites and tblPlots by SiteKey.}
+\item{sites.plots}{Data frame. The result of merging the DIMA tables tblSites and tblPlots by SiteKey.}
 }
 \description{
 Create a data frame documenting errors in soil pit forms
