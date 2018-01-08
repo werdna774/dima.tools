@@ -775,7 +775,7 @@ create.errorframe <- function(source.df,
       if (!(error.component %in% names(source.df)) | length(error.component) > 1) {
         stop("The variable name in error.component must match exactly one of the variables in source.df")
       }
-      error.values <- source.df[[error.component]]
+      error.values <- source.df[[error.component]][error.vector]
     } else {
       error.values <- error.component
     }
