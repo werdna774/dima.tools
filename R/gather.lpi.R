@@ -203,6 +203,16 @@ gather.lpi <- function(dima.tables,
                        all.x = TRUE)
     }
 
+    # Add the species characteristics for unknown codes that show up here
+    # Which codes don't show up in the species characteristics table?
+    unaccounted.codes <- unique(lpi.tall$code[!(lpi.tall$code %in% species$SpeciesCode)])
+    # Make a data frame of the result of running those through check.code()
+    unknowns.df <- dplyr::bind_rows(lapply(lapply(unaccounted.codes, check.code), data.frame))
+    # Slice that to only the ones that were valid unknown codes
+    unknowns.df <- unknowns.df[unknowns.df$Valid,]
+    # Smash those into the species table
+    species <- dplyr::bind_rows(list(species, unknowns.df))
+
     ## Add species information
     lpi.tall <- merge(x = lpi.tall,
                       y = species,
