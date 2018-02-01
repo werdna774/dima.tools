@@ -350,3 +350,30 @@ extract.table <- function(data.path, dima, query){
   RODBC::odbcClose(channel = dima.channel)
   return(data.current)
 }
+
+#' Read Tables From ESRI Geodatabases
+#' @description A workaround using \code{gdalUtils::ogr2ogr()} and \code{foreign::read.dbf()} to read tables without geometry from ESRI geodatabases into R environments as data frames.
+#' @param dsn Character string. The full filepath and filename (including file extension) of the geodatabase containing the table of interest.
+#' @param tablename Character string. The exact name of the table in the file geodatabase being read in.
+#' @param overwrite Logical. If \code{TRUE} then the intermediate step of writing the table to a temporary file as an ESRI shapefile can overwrite an existing shapefile if they share a filepath and filename. Defaults to \code{TRUE}.
+#' @param verbose Logical. Passed to \code{gdalUtils::ogr2ogr(verbose)}. Verbose mode can be very helpful for troubleshooting. Defaults to \code{FALSE}.
+#' @return Data frame
+#' @export
+read.gdbtable <- function(dsn,
+                          tablename,
+                          overwrite = TRUE,
+                          verbose = FALSE) {
+
+  # Make the call to write the table like an ESRI shapefile in a temp directory
+  gdalUtils::ogr2ogr(src_datasource_name = dsn,
+                     dst_datasource_name = tempdir(),
+                     f = "ESRI Shapefile",
+                     layer = tablename,
+                     verbose = verbose,
+                     overwrite = overwrite)
+
+  # Read the geometry-less shapefile to get the data frame in
+  df <- foreign::read.dbf(file.path(conversionDir, paste0(tablename, ".dbf")))
+
+  return(df)
+}
