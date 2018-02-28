@@ -40,17 +40,17 @@ read.dima <- function(data.path,
     stop("At least one of all.tables, gap, lpi, species, species.inventory, and stability must be TRUE or custom.query must not be NULL.")
   }
   if (is.null(dima.list)) {
-    dima.list <- list.files(path = data.path, pattern = "\\.(MDB)|(mdb)|(accdb)|(ACCDB)$")
+    dima.list <- list.files(path = data.path, pattern = "\\.(MDB)|(mdb)$")
     if (is.null(dima.list)) {
-      stop(paste0("No Access databases found in ", data.path))
+      stop(paste0("No .mdb format Access databases found in ", data.path))
     }
   } else {
-    if (length(dima.list[grepl(x = dima.list, pattern = "\\.(MDB)|(mdb)|(accdb)|(ACCDB)$")]) != length(dima.list)) {
+    if (length(dima.list[grepl(x = dima.list, pattern = "\\.(MDB)|(mdb)$")]) != length(dima.list)) {
       stop("Valid file extension required for all DIMAs in argument dima.list")
     }
-    if (length(dima.list[dima.list %in% list.files(path = data.path, pattern = "\\.(MDB)|(mdb)|(accdb)|(ACCDB)$")]) != length(dima.list)) {
+    if (length(dima.list[dima.list %in% list.files(path = data.path, pattern = "\\.(MDB)|(mdb)$")]) != length(dima.list)) {
       stop(paste0("Unable to find the following DIMAs in the provided data path: ",
-                  paste(dima.list[!(dima.list %in% list.files(path = data.path, pattern = "\\.(MDB)|(mdb)|(accdb)|(ACCDB)$"))], collapse = ", ")))
+                  paste(dima.list[!(dima.list %in% list.files(path = data.path, pattern = "\\.(MDB)|(mdb)$"))], collapse = ", ")))
     }
   }
 
