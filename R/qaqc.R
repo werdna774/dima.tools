@@ -312,24 +312,56 @@ check.lpi <- function(detail.table,
   lower.canopy.codes <- c("L", "HL", "WL", "NL", "DS", "VL", "GR", "CB", "ST")
   # For the canopy layers
   # A loop isn't too inefficient when you expect no more than seven passes
+
+
+  ## MAKE A BADCODES VARIABLE FOR EACH LAYER, THEN MUTATE THEM TOGETHER
+
   for (layer in lower.variables) {
+    # First, make a badcodes variable with this layer's codes in it
+    detail.table[[paste0("badcodes.", layer)]] <- detail.table[[layer]]
     # Check to see if there's a valid unknown code
     valid.lowercanopy.unknowns <- (valid.lowercanopy.unknowns | grepl(detail.table[[layer]], pattern = "^(AF|AG|PF|PG|SH|TR)[0-9]{2,3}$"))
     # Check to see if there's a valid species code
     valid.lowercanopy.species <- (valid.lowercanopy.species | detail.table[[layer]] %in% all.species$Symbol)
+    # Check to see if it has a valid non-species code
     valid.lowercanopy.code <- (valid.lowercanopy.species | detail.table[[layer]] %in% lower.canopy.codes)
+    # In the badcodes variable for the layer, replace the codes with NA for any observation where the code was actually a valid one
+    detail.table[valid.lowercanopy.unknowns| valid.lowercanopy.species | valid.lowercanopy.code, paste0("badcodes.", layer)] <- NA
   }
+  badlowercodes <- lapply(X = 1:nrow(detail.table),
+                                 FUN = function(X, detail.table, badcodevars){
+                                   row <- X
+                                   badcodes <- c()
+                                   for (var in badcodevars) {
+                                     if (!is.na(detail.table[row, var])) {
+                                       badcodes <- c(badcodes, detail.table[row, var])
+                                     }
+                                   }
+                                   output <- badcodes[!is.na(badcodes)]
+                                   if (length(output) < 1) {
+                                     return(output)
+                                   } else {
+                                     return(NULL)
+                                   }
+                                 },
+                                 detail.table = detail.table,
+                                 badcodevars = paste0("badcodes.", lower.variables))
+  detail.table[["badlowercodes"]] <- badlowercodes
+
+
   # Vectors to check the first hit and surface hit
   valid.topcanopy <- grepl(detail.table$TopCanopy, pattern = "^(AF|AG|PF|PG|SH|TR)[0-9]{2,3}$") | detail.table$TopCanopy %in% all.species$Symbol | detail.table$TopCanopy %in% c("None")
   valid.surface <- grepl(detail.table$SoilSurface, pattern = "^(AF|AG|PF|PG|SH|TR)[0-9]{2,3}$") | detail.table$SoilSurface %in% all.species$Symbol | detail.table$SoilSurface %in% surface.codes
 
   # Get the entries where something was wrong and add an appropriate error. Slicing after adding the error means never worrying about empty data frames
+  detail.table$error <- NA
+
   invalid.top <- detail.table[!valid.topcanopy, c("RecKey", "PointLoc", "TopCanopy")]
   invalid.top$error <- paste("Invalid value in the top canopy slot:", invalid.top$TopCanopy)
   invalid.top <- invalid.top[, c("RecKey", "PointLoc", "error")]
 
-  invalid.lower <- detail.table[!valid.lowercanopy.code & !valid.lowercanopy.species & !valid.lowercanopy.unknowns, c("RecKey", "PointLoc", lower.variables)]
-  invalid.lower$error <- "Invalid value in a lower canopy slot"
+  invalid.lower <- detail.table[!valid.lowercanopy.code & !valid.lowercanopy.species & !valid.lowercanopy.unknowns, c("RecKey", "PointLoc", "badlowercodes")]
+  invalid.lower$error <- paste("Invalid value in a lower canopy slot (one or more of the following):", lapply(X = invalid.top$badlowercodes, FUN = function(X){paste(X, collapse = ", ")}))
   invalid.lower <- invalid.lower[, c("RecKey", "PointLoc", "error")]
 
   invalid.surface <- detail.table[!valid.surface, c("RecKey", "PointLoc", "SoilSurface")]
