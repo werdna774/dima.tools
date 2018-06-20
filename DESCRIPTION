@@ -15,3 +15,4 @@ Imports:
 Suggests: knitr,
     rmarkdown
 VignetteBuilder: knitr
+Remotes: smccord/terradactyl
