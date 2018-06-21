@@ -100,4 +100,3 @@ metamerge <- function(dima.tables = list(),
 
   return(sites.plots.lines.header.details)
 }
-
