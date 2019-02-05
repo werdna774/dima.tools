@@ -11,9 +11,8 @@ LazyData: true
 RoxygenNote: 6.0.1
 Imports:
   tidyverse,
-  RODBC,
-  terradactyl
+  RODBC
 Suggests: knitr,
     rmarkdown
 VignetteBuilder: knitr
-Remotes: smccord/terradactyl
+
